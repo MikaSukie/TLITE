@@ -1,0 +1,76 @@
+QMainWindow {
+    background-color: #1e1e1e;
+}
+
+QTextEdit {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    font-family: Consolas, Courier, monospace;
+    font-size: 14pt;
+    border: none;
+    selection-background-color: #264f78;
+    padding: 10px;
+    border-radius: 6px;
+    outline: none;
+}
+
+QScrollBar:vertical {
+    background: #2d2d30;
+    width: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background: #5a5a5a;
+    border-radius: 6px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #808080;
+}
+
+QMenuBar {
+    background-color: #2d2d30;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+QMenuBar::item {
+    padding: 4px 12px;
+    background-color: transparent;
+}
+
+QMenuBar::item:selected {
+    background-color: #3e3e42;
+}
+
+QMenu {
+    background-color: #2d2d30;
+    color: #ffffff;
+    border: 1px solid #444;
+    padding: 6px;
+}
+
+QMenu::item {
+    padding: 6px 20px;
+}
+
+QMenu::item:selected {
+    background-color: #007acc;
+    color: white;
+}
+QStatusBar {
+    color: #ffffff;
+    background-color: transparent;
+    padding: 2px 6px;
+    font-weight: normal;
+}
+QCheckBox {
+    color: #ffffff;
+    background-color: transparent;
+    padding: 2px 6px;
+    font-weight: normal;
+}
+

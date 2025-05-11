@@ -1,0 +1,1 @@
+pyinstaller --noconfirm --onefile --noconsole --windowed --icon=myicon.ico --add-data "config;config" --name=TLintITE main.py

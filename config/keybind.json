@@ -1,0 +1,20 @@
+{
+    "new_file": "Ctrl+N",
+    "open_file": "Ctrl+O",
+    "save_file": "Ctrl+S",
+    "save_as_file": "Ctrl+Shift+S",
+    "reload_rules": "Ctrl+L",
+    "reload_all_rules": "Ctrl+R",
+    "reload_instaplace": "Ctrl+I",
+    "find_replace": "Ctrl+F",
+    "toggle_instaplace": "Ctrl+W",
+    "edit_keybindings": "None",
+    "reload_keybinds": "None",
+    "set_paragraph_settings": "None",
+    "change_font": "None",
+    "change_font_size": "None",
+    "change_line_spacing": "None",
+    "outline_none": "None",
+    "outline_a4": "None",
+    "outline_iso216": "None"
+}

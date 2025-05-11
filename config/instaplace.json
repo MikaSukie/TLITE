@@ -1,0 +1,13 @@
+[
+    { "find": "amra", "replace": "America" },
+    { "find": "cst", "replace": "Constitution " },
+    { "find": "tgr", "replace": "together " },
+    { "find": "estsh", "replace": "establishing " },
+    { "find": "gvmt", "replace": "government " },
+    { "find": "amdmt", "replace": "Amendment" },
+    { "find": "usst", "replace": "United States" },
+    { "find": "blrt", "replace": "Bill of Rights" },
+    { "find": "unss", "replace": "unsuccessful"},
+    { "find": "appra", "replace": "appreciate"},
+    { "find": "os", "replace": "operating system"}
+]
