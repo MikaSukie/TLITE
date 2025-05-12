@@ -135,7 +135,6 @@
   { "word": "here", "color": "lightsteelblue" },
   { "word": "all", "color": "yellowgreen" },
   { "word": "some", "color": "darksalmon" },
-  { "word": "many", "color": "chocolate" },
   { "word": "few", "color": "powderblue" },
   { "word": "none", "color": "indianred" },
   { "word": "love", "color": "pink" },
@@ -366,5 +365,8 @@
   { "word": "deny", "color": "tomato" },
   { "word": "denied", "color": "tomato" },
   { "word": "denying", "color": "tomato" },
+  { "word": "many", "color": "chocolate" },
+  { "word": "much", "color": "orange" },
+  { "word": "very", "color": "purple" },
   { "word": "decision", "color": "gray" }
 ]
