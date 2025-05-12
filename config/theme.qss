@@ -97,3 +97,36 @@ QListView {
     selection-color: #ffffff;
     outline: none;
 }
+
+QDialog, QMessageBox, QInputDialog {
+    background-color: #2d2d30;
+    color: #ffffff;
+    border: 1px solid #444;
+}
+
+QDialog QLabel, QMessageBox QLabel, QInputDialog QLabel {
+    color: #ffffff;
+    font-size: 12pt;
+}
+
+QDialog QPushButton, QMessageBox QPushButton, QInputDialog QPushButton {
+    background-color: #3e3e42;
+    color: #ffffff;
+    border: 1px solid #555;
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+
+QDialog QPushButton:hover, QMessageBox QPushButton:hover, QInputDialog QPushButton:hover {
+    background-color: #007acc;
+    border: 1px solid #007acc;
+}
+
+QLineEdit {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #444;
+    padding: 4px 6px;
+    border-radius: 4px;
+    selection-background-color: #264f78;
+}
