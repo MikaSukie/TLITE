@@ -196,6 +196,10 @@ class CustomTextEdit(QTextEdit):
         self.setTextCursor(tc)
 
     def keyPressEvent(self, event):
+        if hasattr(self.parent(), "suggestions_enabled") and not self.parent().suggestions_enabled:
+            super().keyPressEvent(event)
+            self.completer.popup().hide()
+            return
 
         if self.completer.popup().isVisible():
             if event.key() in (Qt.Key_Tab, Qt.Key_Enter, Qt.Key_Return):
@@ -245,6 +249,13 @@ class MainWindow(QMainWindow):
         self.instaplace_checkbox.stateChanged.connect(self.toggle_instaplace_checkbox)
         self.statusBar().addPermanentWidget(self.instaplace_checkbox)
 
+        self.suggestion_checkbox = QCheckBox("Suggestions")
+        self.suggestion_checkbox.setChecked(True)
+        self.suggestion_checkbox.stateChanged.connect(self.toggle_suggestions_checkbox)
+        self.statusBar().addPermanentWidget(self.suggestion_checkbox)
+
+        self.suggestions_enabled = True
+
         self.editor.textChanged.connect(self.update_counters)
         self.editor.textChanged.connect(self.apply_instaplace_live)
         self.update_counters()
@@ -273,6 +284,9 @@ class MainWindow(QMainWindow):
             self.insertPlainText(text)
         else:
             super().paste()
+
+    def toggle_suggestions_checkbox(self, state):
+        self.suggestions_enabled = state == Qt.Checked
 
     def reload_all_rules(self):
         self.reload_rules()
@@ -354,6 +368,12 @@ class MainWindow(QMainWindow):
         edit_keybinds_action.triggered.connect(self.edit_keybindings)
         edit_menu.addAction(edit_keybinds_action)
 
+        toggle_suggestions_action = QAction("Toggle Suggestions", self)
+        toggle_suggestions_action.setObjectName("toggle_suggestions_action")
+        toggle_suggestions_action.triggered.connect(self.toggle_suggestions)
+        edit_menu.addAction(toggle_suggestions_action)
+        self.editor.addAction(toggle_suggestions_action)
+
         reload_keybinds_action = QAction("Reload Keybindings", self)
         reload_keybinds_action.setObjectName("reload_keybinds_action")
         reload_keybinds_action.triggered.connect(lambda: (self.load_keybinds(), self.init_menu()))
@@ -387,6 +407,7 @@ class MainWindow(QMainWindow):
         reload_instaplace_action.setShortcut(self.keybinds.get("reload_instaplace", "Ctrl+Shift+I"))
         find_action.setShortcut(self.keybinds.get("find_replace", "Ctrl+F")),
         toggle_instaplace_action.setShortcut(self.keybinds.get("toggle_instaplace", "Ctrl+W"))
+        toggle_suggestions_action.setShortcut(self.keybinds.get("toggle_suggestions", "Ctrl+E"))
 
     def toggle_find_replace(self):
         if self.find_dock.isVisible():
@@ -415,7 +436,8 @@ class MainWindow(QMainWindow):
             "change_line_spacing": "None",
             "outline_none": "None",
             "outline_a4": "None",
-            "outline_iso216": "None"
+            "outline_iso216": "None",
+            "toggle_suggestions": "Ctrl+E"
         }
 
         if os.path.exists(path):
@@ -447,7 +469,8 @@ class MainWindow(QMainWindow):
             ("change_line_spacing", self.findChild(QAction, "line_spacing_action")),
             ("outline_none", self.findChild(QAction, "none_action")),
             ("outline_a4", self.findChild(QAction, "a4_action")),
-            ("outline_iso216", self.findChild(QAction, "iso216_action"))
+            ("outline_iso216", self.findChild(QAction, "iso216_action")),
+            ("toggle_suggestions", self.findChild(QAction, "toggle_suggestions_action"))
         ]
         for key, action in actions:
             if action:
@@ -466,6 +489,11 @@ class MainWindow(QMainWindow):
                 json.dump(self.keybinds, f, indent=4)
             self.apply_keybinds()
             QMessageBox.information(self, "Keybindings Updated", "Keybindings were updated and applied.")
+
+    def toggle_suggestions(self):
+        current = getattr(self, "suggestions_enabled", True)
+        self.suggestions_enabled = not current
+        self.suggestion_checkbox.setChecked(self.suggestions_enabled)
 
     def find_text_docked(self, dock):
         text = dock.find_input.text()
