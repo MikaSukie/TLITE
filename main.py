@@ -3,11 +3,12 @@ import shutil
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QTextEdit, QFileDialog, QAction, QInputDialog, QFontDialog, QDesktopWidget, QStatusBar,
-    QHBoxLayout, QPushButton, QCheckBox, QLabel, QLineEdit, QVBoxLayout, QWidget, QDockWidget, QDialog, QMessageBox
+    QHBoxLayout, QPushButton, QCheckBox, QLabel, QLineEdit, QVBoxLayout, QWidget, QDockWidget, QDialog, QMessageBox,
+    QCompleter
 )
 from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont, QTextBlockFormat, QPainter, QPen, \
     QTextDocument, QTextCursor
-from PyQt5.QtCore import QRegExp, pyqtSlot, Qt, QRect
+from PyQt5.QtCore import QRegExp, pyqtSlot, Qt, QRect, QStringListModel
 import sys
 import os
 import json
@@ -106,6 +107,15 @@ class EnglishLinter(QSyntaxHighlighter):
                 self.setFormat(index, length, fmt)
                 index = pattern.indexIn(text, index + length)
 
+    def get_words(self):
+        return [rule['word'] for rule in self.load_rules_from_file()]
+
+    def load_rules_from_file(self):
+        if os.path.exists(self.rules_path):
+            with open(self.rules_path, "r", encoding="utf-8") as file:
+                return json.load(file)
+        return []
+
 class FindReplaceDock(QDockWidget):
     def __init__(self, parent=None):
         super().__init__("Find & Replace", parent)
@@ -142,6 +152,13 @@ class CustomTextEdit(QTextEdit):
     def __init__(self, plain_paste_callback=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.get_plain_paste_enabled = plain_paste_callback
+        self.completer = QCompleter()
+        self.completer.setWidget(self)
+        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        self.completer.setCaseSensitivity(False)
+        self.completer.activated.connect(self.insertCompletion)
+        self.model = QStringListModel()
+        self.completer.setModel(self.model)
 
     def paste(self):
         if self.get_plain_paste_enabled and self.get_plain_paste_enabled():
@@ -151,6 +168,63 @@ class CustomTextEdit(QTextEdit):
             self.insertPlainText(text)
         else:
             super().paste()
+
+    def generateInstaplaceSuggestions(self, word):
+        suggestions = set()
+
+        word = word.lower()
+
+        if hasattr(self.parent(), "instaplace_rules"):
+            for rule in self.parent().instaplace_rules:
+                find = rule["find"].lower()
+                replace = rule["replace"]
+                if find.startswith(word) or replace.lower().startswith(word):
+                    suggestions.add(replace)
+
+        if hasattr(self.parent(), "linter"):
+            for lint_word in self.parent().linter.get_words():
+                if lint_word.lower().startswith(word):
+                    suggestions.add(lint_word)
+
+        return list(suggestions)
+
+    def insertCompletion(self, completion):
+        tc = self.textCursor()
+        extra = len(completion) - len(self.completer.completionPrefix())
+        tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, len(self.completer.completionPrefix()))
+        tc.insertText(completion)
+        self.setTextCursor(tc)
+
+    def keyPressEvent(self, event):
+
+        if self.completer.popup().isVisible():
+            if event.key() in (Qt.Key_Tab, Qt.Key_Enter, Qt.Key_Return):
+                event.accept()
+                self.insertCompletion(self.completer.currentCompletion())
+                self.completer.popup().hide()
+                return
+
+        super().keyPressEvent(event)
+
+        cursor = self.textCursor()
+        cursor.select(QTextCursor.WordUnderCursor)
+        current_word = cursor.selectedText().strip()
+
+        if not current_word or current_word.isspace():
+            self.completer.popup().hide()
+            return
+
+        suggestions = self.generateInstaplaceSuggestions(current_word)
+
+        if suggestions:
+            self.model.setStringList(suggestions)
+            self.completer.setCompletionPrefix(current_word)
+            rect = self.cursorRect()
+            rect.setWidth(self.completer.popup().sizeHintForColumn(0) + 10)
+            self.completer.complete(rect)
+        else:
+            self.completer.popup().hide()
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -392,7 +466,6 @@ class MainWindow(QMainWindow):
                 json.dump(self.keybinds, f, indent=4)
             self.apply_keybinds()
             QMessageBox.information(self, "Keybindings Updated", "Keybindings were updated and applied.")
-
 
     def find_text_docked(self, dock):
         text = dock.find_input.text()
