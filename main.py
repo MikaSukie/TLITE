@@ -792,8 +792,21 @@ class MainWindow(QMainWindow):
         try:
             path = self.file_model.filePath(index)
             if os.path.isfile(path):
-                with open(path, 'r', encoding='utf-8') as file:
-                    full_text = file.read()
+                allowed_exts = {'.txt', '.tlxt', '.py', '.md', '.json', '.csv', '.java', '.rs', '.cpp', '.css', '.js',
+                                '.html', '.c', '.cs'}
+                ext = os.path.splitext(path)[1].lower()
+                if ext not in allowed_exts:
+                    QMessageBox.warning(self, "Unsupported File", f"File type '{ext}' is not supported.")
+                    return
+
+                try:
+                    with open(path, 'r', encoding='utf-8') as file:
+                        full_text = file.read()
+                except UnicodeDecodeError:
+                    QMessageBox.warning(self, "Error", "Cannot open file: Not a valid UTF-8 text file.")
+                    return
+
+                self.current_file_path = path
 
                 settings_match = re.search(
                     r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>",
@@ -813,11 +826,9 @@ class MainWindow(QMainWindow):
                         print("Failed to parse settings:", e)
                 else:
                     self.editor.setPlainText(full_text)
-
-                self.current_file_path = path
         except Exception as e:
             print(e)
-            QMessageBox.information(self, "Error:", e)
+            QMessageBox.information(self, "Error:", str(e))
 
     def open_file(self):
         try:
@@ -826,9 +837,21 @@ class MainWindow(QMainWindow):
                 "Text Files (*.txt *.tlxt *.py *.md *.json *.csv *.java *.class *.rs *.cpp *.css *.js *.html *.c *.cs);;All Files (*)"
             )
             if path:
+                allowed_exts = {'.txt', '.tlxt', '.py', '.md', '.json', '.csv', '.java', '.rs', '.cpp', '.css', '.js',
+                                '.html', '.c', '.cs'}
+                ext = os.path.splitext(path)[1].lower()
+                if ext not in allowed_exts:
+                    QMessageBox.warning(self, "Unsupported File", f"File type '{ext}' is not supported.")
+                    return
+
+                try:
+                    with open(path, 'r', encoding='utf-8') as file:
+                        full_text = file.read()
+                except UnicodeDecodeError:
+                    QMessageBox.warning(self, "Error", "Cannot open file: Not a valid UTF-8 text file.")
+                    return
+
                 self.current_file_path = path
-                with open(path, 'r', encoding='utf-8') as file:
-                    full_text = file.read()
 
                 settings_match = re.search(
                     r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>",
