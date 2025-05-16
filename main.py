@@ -248,8 +248,13 @@ class CustomTextEdit(QTextEdit):
             self.model.setStringList(suggestions)
             self.completer.setCompletionPrefix(current_word)
             rect = self.cursorRect()
-            rect.setWidth(self.completer.popup().sizeHintForColumn(0) + 10)
+            popup = self.completer.popup()
+
+            popup_size = popup.sizeHintForColumn(0) + 20
+            popup.setFixedWidth(popup_size)
+
             self.completer.complete(rect)
+
         else:
             self.completer.popup().hide()
 
@@ -783,23 +788,36 @@ class MainWindow(QMainWindow):
             block_format.setLineHeight(spacing * 100, QTextBlockFormat.ProportionalHeight)
             cursor.setBlockFormat(block_format)
 
-    def show_error_message(self, title, message):
-        QMessageBox.critical(self, title, message)
-
     def open_file_from_browser(self, index):
         try:
             path = self.file_model.filePath(index)
             if os.path.isfile(path):
                 with open(path, 'r', encoding='utf-8') as file:
-                    text = file.read()
-                self.editor.setPlainText(text)
+                    full_text = file.read()
+
+                settings_match = re.search(
+                    r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>",
+                    full_text, re.DOTALL
+                )
+
+                if settings_match:
+                    settings_str = settings_match.group(1)
+                    content_start = settings_match.end()
+                    content = full_text[content_start:].lstrip()
+
+                    self.editor.setPlainText(content)
+                    try:
+                        settings = json.loads(settings_str)
+                        self._apply_settings(settings)
+                    except Exception as e:
+                        print("Failed to parse settings:", e)
+                else:
+                    self.editor.setPlainText(full_text)
+
                 self.current_file_path = path
-        except FileNotFoundError:
-            self.show_error_message("File Not Found", f"The file does not exist:\n{path}")
-        except UnicodeDecodeError:
-            self.show_error_message("Encoding Error", "The file could not be decoded with UTF-8 encoding.")
         except Exception as e:
-            self.show_error_message("Error Opening File", str(e))
+            print(e)
+            QMessageBox.information(self, "Error:", e)
 
     def open_file(self):
         try:
@@ -807,38 +825,33 @@ class MainWindow(QMainWindow):
                 self, "Open File", "",
                 "Text Files (*.txt *.tlxt *.py *.md *.json *.csv *.java *.class *.rs *.cpp *.css *.js *.html *.c *.cs);;All Files (*)"
             )
-            if not path:
-                return
+            if path:
+                self.current_file_path = path
+                with open(path, 'r', encoding='utf-8') as file:
+                    full_text = file.read()
 
-            with open(path, 'r', encoding='utf-8') as file:
-                text = file.read()
+                settings_match = re.search(
+                    r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>",
+                    full_text, re.DOTALL
+                )
 
-            settings_match = re.search(r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>", text,
-                                       re.DOTALL)
-            if settings_match:
-                try:
-                    settings = json.loads(settings_match.group(1))
-                except json.JSONDecodeError:
-                    self.show_error_message("Settings Error", "Could not parse embedded settings JSON.")
-                    settings = {}
+                if settings_match:
+                    settings_str = settings_match.group(1)
+                    content_start = settings_match.end()
+                    content = full_text[content_start:].lstrip()
 
-                content_start = settings_match.end()
-                content = text[content_start:].lstrip()
+                    self.editor.setPlainText(content)
+                    try:
+                        settings = json.loads(settings_str)
+                        self._apply_settings(settings)
+                    except Exception as e:
+                        print("Failed to parse settings:", e)
+                else:
+                    self.editor.setPlainText(full_text)
 
-                self.editor.setPlainText(content)
-                if settings:
-                    self._apply_settings(settings)
-            else:
-                self.editor.setPlainText(text)
-
-            self.current_file_path = path
-
-        except FileNotFoundError:
-            self.show_error_message("File Not Found", f"The file does not exist:\n{path}")
-        except UnicodeDecodeError:
-            self.show_error_message("Encoding Error", "The file could not be decoded with UTF-8 encoding.")
         except Exception as e:
-            self.show_error_message("Error Opening File", str(e))
+            print(e)
+            QMessageBox.information(self, "Error:", str(e))
 
     def save_file(self):
         try:
@@ -847,21 +860,19 @@ class MainWindow(QMainWindow):
             else:
                 self.save_as_file()
         except Exception as e:
-            self.show_error_message("Error Saving File", str(e))
+            print(e)
 
     def save_as_file(self):
         try:
             path, _ = QFileDialog.getSaveFileName(self, "Save As", "", "TLintITE Files (*.tlxt)")
-            if not path:
-                return
-
-            if not path.endswith('.tlxt'):
-                path += '.tlxt'
-
-            self.current_file_path = path
-            self._save_to_path(path)
+            if path:
+                if not path.endswith('.tlxt'):
+                    path += '.tlxt'
+                self.current_file_path = path
+                self._save_to_path(path)
         except Exception as e:
-            self.show_error_message("Error Saving File", str(e))
+            print(e)
+            QMessageBox.information(self, "Error:", e)
 
     def _save_to_path(self, path):
         try:
@@ -873,24 +884,30 @@ class MainWindow(QMainWindow):
             }
 
             content = self.editor.toPlainText()
-            tlxt_data = f"<__s-e-t-t-i-n-g-s__>\n{json.dumps(settings, indent=2)}\n</__s-e-t-t-i-n-g-s__>\n{content}"
+            data = f"<__s-e-t-t-i-n-g-s__>\n{json.dumps(settings, indent=2)}\n</__s-e-t-t-i-n-g-s__>\n{content}"
 
             with open(path, "w", encoding="utf-8") as file:
-                file.write(tlxt_data)
+                file.write(data)
         except Exception as e:
-            self.show_error_message("Error Saving File", str(e))
+            print(e)
+            QMessageBox.information(self, "Error:", str(e))
 
     def _apply_settings(self, settings):
         try:
-            font = QFont(settings.get("font_family", "Consolas"), settings.get("font_size", 14))
+            font_family = settings.get("font_family", "Consolas")
+            font_size = settings.get("font_size", 14)
+            font = QFont(font_family, font_size)
             self.editor.setFont(font)
+
             self.sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
 
             spacing = settings.get("line_spacing", 1.0)
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
+
             doc = self.editor.document()
             block = doc.firstBlock()
+
             while block.isValid():
                 cursor.setPosition(block.position())
                 cursor.select(QTextCursor.BlockUnderCursor)
@@ -898,17 +915,22 @@ class MainWindow(QMainWindow):
                 block_format.setLineHeight(spacing * 100, QTextBlockFormat.ProportionalHeight)
                 cursor.setBlockFormat(block_format)
                 block = block.next()
+
             cursor.endEditBlock()
 
             self.update_counters()
         except Exception as e:
-            print(e)
-            QMessageBox.information(self, "Error:", e)
+            print("Error applying settings:", e)
+
+    @staticmethod
+    def strip_settings_tag(text):
+        return re.sub(r"<__s-e-t-t-i-n-g-s__>.*?</__s-e-t-t-i-n-g-s__>", "", text, flags=re.DOTALL)
 
     def _get_line_spacing(self):
         cursor = self.editor.textCursor()
         block_format = cursor.blockFormat()
-        return block_format.lineHeight() / 100.0 if block_format.lineHeight() else 1.0
+        line_height = block_format.lineHeight()
+        return (line_height / 100.0) if line_height > 0 else 1.0
 
     @pyqtSlot()
     def reload_rules(self):
