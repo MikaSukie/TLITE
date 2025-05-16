@@ -14,6 +14,7 @@ QTextEdit {
     outline: none;
 }
 
+
 QScrollBar:vertical, QScrollBar:horizontal {
     background: #2d2d30;
     border: none;
@@ -40,6 +41,7 @@ QScrollBar::add-line, QScrollBar::sub-line {
     width: 0px;
 }
 
+
 QMenuBar {
     background-color: #2d2d30;
     color: #ffffff;
@@ -55,6 +57,7 @@ QMenuBar::item:selected {
     background-color: #3e3e42;
     border-radius: 4px;
 }
+
 
 QMenu {
     background-color: #2d2d30;
@@ -73,6 +76,7 @@ QMenu::item:selected {
     color: white;
 }
 
+
 QStatusBar {
     color: #ffffff;
     background-color: #252526;
@@ -81,11 +85,13 @@ QStatusBar {
     font-weight: normal;
 }
 
+
 QCheckBox {
     color: #ffffff;
     padding: 4px;
     spacing: 6px;
 }
+
 
 QListView {
     background-color: #2d2d30;
@@ -93,11 +99,14 @@ QListView {
     border: 1px solid #444;
     padding: 6px;
     font-family: Consolas, Courier, monospace;
-    font-size: 13pt;
+    font-size: 12pt;
     selection-background-color: #007acc;
     selection-color: #ffffff;
     outline: none;
+    padding-top: 2px;
+    padding-bottom: 4px;
 }
+
 
 QTreeView {
     background-color: #252526;
@@ -138,6 +147,7 @@ QLineEdit {
     font-size: 11pt;
 }
 
+
 QDockWidget {
     background-color: #1e1e1e;
     border: 1px solid #444;
@@ -153,6 +163,7 @@ QDockWidget::title {
     text-align: left;
 }
 
+
 QLineEdit {
     background-color: #2d2d30;
     color: #ffffff;
@@ -161,6 +172,7 @@ QLineEdit {
     border-radius: 4px;
     font-size: 13pt;
 }
+
 
 QPushButton {
     background-color: #007acc;
