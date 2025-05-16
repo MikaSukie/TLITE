@@ -209,10 +209,18 @@ class CustomTextEdit(QTextEdit):
 			return
 
 		if self.completer.popup().isVisible():
-			if event.key() in (Qt.Key_Tab, Qt.Key_Enter, Qt.Key_Return):
-				event.accept()
-				self.insertCompletion(self.completer.currentCompletion())
-				self.completer.popup().hide()
+			if event.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Tab):
+				popup = self.completer.popup()
+				current_index = popup.currentIndex()
+				if current_index.isValid():
+					completion = self.model.data(current_index, Qt.DisplayRole)
+					if completion:
+						event.accept()
+						self.insertCompletion(completion)
+						self.completer.popup().hide()
+						return
+			elif event.key() in (Qt.Key_Up, Qt.Key_Down):
+				event.ignore()
 				return
 
 		super().keyPressEvent(event)
@@ -231,11 +239,15 @@ class CustomTextEdit(QTextEdit):
 			self.model.setStringList(suggestions)
 			self.completer.setCompletionPrefix(current_word)
 			rect = self.cursorRect()
-			rect.setWidth(self.completer.popup().sizeHintForColumn(0) + 10)
+			popup = self.completer.popup()
+
+			popup_size = popup.sizeHintForColumn(0) + 20
+			popup.setFixedWidth(popup_size)
+
 			self.completer.complete(rect)
+
 		else:
 			self.completer.popup().hide()
-
 
 class MainWindow(QMainWindow):
 	def __init__(self):
