@@ -1,372 +1,1494 @@
 [
-  { "word": "the", "color": "lightblue" },
-  { "word": "a", "color": "crimson" },
-  { "word": "is", "color": "gold" },
-  { "word": "are", "color": "goldenrod" },
-  { "word": "was", "color": "sandybrown" },
-  { "word": "were", "color": "burlywood" },
-  { "word": "be", "color": "khaki" },
-  { "word": "been", "color": "navajowhite" },
-  { "word": "being", "color": "wheat" },
-  { "word": "am", "color": "lemonchiffon" },
-  { "word": "have", "color": "mediumslateblue" },
-  { "word": "has", "color": "mediumorchid" },
-  { "word": "had", "color": "orchid" },
-  { "word": "do", "color": "lightcoral" },
-  { "word": "does", "color": "salmon" },
-  { "word": "did", "color": "lightsalmon" },
-  { "word": "add", "color": "green" },
-  { "word": "adds", "color": "green" },
-  { "word": "adding", "color": "green" },
-  { "word": "added", "color": "green" },
-  { "word": "subtract", "color": "red" },
-  { "word": "subtracts", "color": "red" },
-  { "word": "subtracting", "color": "red" },
-  { "word": "subtracted", "color": "red" },
-  { "word": "divide", "color": "orange" },
-  { "word": "divides", "color": "orange" },
-  { "word": "divides", "color": "orange" },
-  { "word": "dividing", "color": "orange" },
-  { "word": "divided", "color": "orange" },
-  { "word": "multiply", "color": "lightgreen" },
-  { "word": "multiplies", "color": "lightgreen" },
-  { "word": "multiplying", "color": "lightgreen" },
-  { "word": "multiplied", "color": "lightgreen" },
-  { "word": "will", "color": "lightgreen" },
-  { "word": "shall", "color": "mediumspringgreen" },
-  { "word": "effective", "color": "mediumspringgreen" },
-  { "word": "useful", "color": "mediumspringgreen" },
-  { "word": "would", "color": "cornflowerblue" },
-  { "word": "should", "color": "darkseagreen" },
-  { "word": "can", "color": "mediumturquoise" },
-  { "word": "could", "color": "powderblue" },
-  { "word": "may", "color": "aquamarine" },
-  { "word": "might", "color": "lightcyan" },
-  { "word": "must", "color": "paleturquoise" },
-  { "word": "now", "color": "deepskyblue" },
-  { "word": "then", "color": "steelblue" },
-  { "word": "and", "color": "limegreen" },
-  { "word": "or", "color": "mediumspringgreen" },
-  { "word": "but", "color": "palevioletred" },
-  { "word": "not", "color": "indianred" },
-  { "word": "this", "color": "darkorange" },
-  { "word": "self", "color": "darkorange" },
-  { "word": "itself", "color": "darkorange" },
-  { "word": "section", "color": "pink" },
-  { "word": "title", "color": "pink" },
-  { "word": "anti", "color": "tomato" },
-  { "word": "non", "color": "tomato" },
-  { "word": "that", "color": "darkorange" },
-  { "word": "it", "color": "violet" },
-  { "word": "its", "color": "violet" },
-  { "word": "it's", "color": "violet" },
-  { "word": "i", "color": "orchid" },
-  { "word": "i'm", "color": "orchid" },
-  { "word": "i’ve", "color": "orchid" },
-  { "word": "i’d", "color": "orchid" },
-  { "word": "i’ll", "color": "orchid" },
-  { "word": "my", "color": "violet" },
-  { "word": "mine", "color": "violet" },
-  { "word": "myself", "color": "violet" },
-  { "word": "you", "color": "turquoise" },
-  { "word": "you're", "color": "turquoise" },
-  { "word": "you’ve", "color": "turquoise" },
-  { "word": "you’ll", "color": "turquoise" },
-  { "word": "your", "color": "turquoise" },
-  { "word": "yours", "color": "turquoise" },
-  { "word": "yourself", "color": "turquoise" },
-  { "word": "he", "color": "lightskyblue" },
-  { "word": "his", "color": "lightskyblue" },
-  { "word": "him", "color": "lightskyblue" },
-  { "word": "himself", "color": "lightskyblue" },
-  { "word": "she", "color": "plum" },
-  { "word": "her", "color": "plum" },
-  { "word": "hers", "color": "plum" },
-  { "word": "herself", "color": "plum" },
-  { "word": "we", "color": "lightsteelblue" },
-  { "word": "we're", "color": "lightsteelblue" },
-  { "word": "our", "color": "lightsteelblue" },
-  { "word": "us", "color": "lightsteelblue" },
-  { "word": "ours", "color": "lightsteelblue" },
-  { "word": "ourselves", "color": "lightsteelblue" },
-  { "word": "they", "color": "lightseagreen" },
-  { "word": "appreciate", "color": "lightseagreen" },
-  { "word": "operating", "color": "lightseagreen" },
-  { "word": "they're", "color": "lightseagreen" },
-  { "word": "their", "color": "lightseagreen" },
-  { "word": "theirs", "color": "lightseagreen" },
-  { "word": "them", "color": "lightseagreen" },
-  { "word": "themselves", "color": "lightseagreen" },
-  { "word": "to", "color": "deepskyblue" },
-  { "word": "of", "color": "coral" },
-  { "word": "in", "color": "palegreen" },
-  { "word": "out", "color": "tomato" },
-  { "word": "system", "color": "darkviolet" },
-  { "word": "on", "color": "mediumseagreen" },
-  { "word": "for", "color": "dodgerblue" },
-  { "word": "while", "color": "lightblue" },
-  { "word": "with", "color": "tomato" },
-  { "word": "new", "color": "yellow" },
-  { "word": "if", "color": "greenyellow" },
-  { "word": "something", "color": "lightgray" },
-  { "word": "some", "color": "lightgray" },
-  { "word": "because", "color": "darkkhaki" },
-  { "word": "as", "color": "skyblue" },
-  { "word": "at", "color": "turquoise" },
-  { "word": "func", "color": "turquoise" },
-  { "word": "fn", "color": "greenyellow" },
-  { "word": "by", "color": "lightpink" },
-  { "word": "from", "color": "mediumaquamarine" },
-  { "word": "what", "color": "red" },
-  { "word": "file", "color": "tomato" },
-  { "word": "when", "color": "orange" },
-  { "word": "whenever", "color": "orange" },
-  { "word": "def", "color": "orange" },
-  { "word": "define", "color": "orange" },
-  { "word": "find", "color": "lightgray" },
-  { "word": "literally", "color": "gold" },
-  { "word": "start", "color": "lightgreen" },
-  { "word": "stop", "color": "red" },
-  { "word": "about", "color": "lightyellow" },
-  { "word": "object", "color": "lightpink" },
-  { "word": "each", "color": "darkorange" },
-  { "word": "those", "color": "lightcoral" },
-  { "word": "there", "color": "slategray" },
-  { "word": "here", "color": "lightsteelblue" },
-  { "word": "all", "color": "yellowgreen" },
-  { "word": "some", "color": "darksalmon" },
-  { "word": "few", "color": "powderblue" },
-  { "word": "none", "color": "indianred" },
-  { "word": "love", "color": "pink" },
-  { "word": "hate", "color": "firebrick" },
-  { "word": "enjoy", "color": "seashell" },
-  { "word": "prefer", "color": "peachpuff" },
-  { "word": "after", "color": "mediumorchid" },
-  { "word": "before", "color": "orangered" },
-  { "word": "around", "color": "fuchsia" },
-  { "word": "like", "color": "fuchsia" },
-  { "word": "similar", "color": "fuchsia" },
-  { "word": "above", "color": "darkgoldenrod" },
-  { "word": "below", "color": "peru" },
-  { "word": "always", "color": "turquoise" },
-  { "word": "sometimes", "color": "slateblue" },
-  { "word": "never", "color": "chocolate" },
-  { "word": "usually", "color": "plum" },
-  { "word": "rarely", "color": "lime" },
-  { "word": "rare", "color": "lime" },
-  { "word": "result", "color": "plum" },
-  { "word": "results", "color": "plum" },
-  { "word": "resulting", "color": "plum" },
-  { "word": "resulted", "color": "plum" },
-  { "word": "sum", "color": "plum" },
-  { "word": "summary", "color": "plum" },
-  { "word": "together", "color": "plum" },
-  { "word": "apart", "color": "seashell" },
-  { "word": "again", "color": "lightcyan" },
-  { "word": "first", "color": "wheat" },
-  { "word": "last", "color": "seashell" },
-  { "word": "next", "color": "mediumvioletred" },
-  { "word": "yes", "color": "forestgreen" },
-  { "word": "no", "color": "tomato" },
-  { "word": "null", "color": "crimson" },
-  { "word": "function", "color": "mediumseagreen" },
-  { "word": "variable", "color": "orangered" },
-  { "word": "class", "color": "mediumslateblue" },
-  { "word": "product", "color": "mediumslateblue" },
-  { "word": "quotient", "color": "mediumslateblue" },
-  { "word": "method", "color": "indianred" },
-  { "word": "array", "color": "lightcoral" },
-  { "word": "loop", "color": "lightseagreen" },
-  { "word": "else", "color": "mediumslateblue" },
-  { "word": "switch", "color": "darkorange" },
-  { "word": "case", "color": "lightpink" },
-  { "word": "break", "color": "tomato" },
-  { "word": "continue", "color": "forestgreen" },
-  { "word": "return", "color": "violet" },
-  { "word": "import", "color": "powderblue" },
-  { "word": "use", "color": "powderblue" },
-  { "word": "require", "color": "powderblue" },
-  { "word": "requires", "color": "powderblue" },
-  { "word": "using", "color": "powderblue" },
-  { "word": "used", "color": "powderblue" },
-  { "word": "needs", "color": "powderblue" },
-  { "word": "needed", "color": "powderblue" },
-  { "word": "necessary", "color": "powderblue" },
-  { "word": "export", "color": "mediumpurple" },
-  { "word": "module", "color": "lightcoral" },
-  { "word": "promise", "color": "lightyellow" },
-  { "word": "async", "color": "limegreen" },
-  { "word": "await", "color": "deepskyblue" },
-  { "word": "callback", "color": "seashell" },
-  { "word": "constructor", "color": "darkgoldenrod" },
-  { "word": "inheritance", "color": "crimson" },
-  { "word": "polymorphism", "color": "chartreuse" },
-  { "word": "encapsulation", "color": "darkslategray" },
-  { "word": "abstraction", "color": "yellowgreen" },
-  { "word": "interface", "color": "violet" },
-  { "word": "instance", "color": "peru" },
-  { "word": "implementation", "color": "lightblue" },
-  { "word": "data", "color": "cornflowerblue" },
-  { "word": "structure", "color": "lightsteelblue" },
-  { "word": "decide", "color": "lightsteelblue" },
-  { "word": "queue", "color": "mediumaquamarine" },
-  { "word": "stack", "color": "lightgoldenrodyellow" },
-  { "word": "graph", "color": "mediumvioletred" },
-  { "word": "tree", "color": "forestgreen" },
-  { "word": "node", "color": "indigo" },
-  { "word": "need", "color": "violet" },
-  { "word": "algorithm", "color": "darkorange" },
-  { "word": "complexity", "color": "lightcyan" },
-  { "word": "runtime", "color": "lightpink" },
-  { "word": "error", "color": "red" },
-  { "word": "exception", "color": "darkviolet" },
-  { "word": "except", "color": "darkviolet" },
-  { "word": "try", "color": "yellow" },
-  { "word": "risk", "color": "yellow" },
-  { "word": "risking", "color": "yellow" },
-  { "word": "risked", "color": "yellow" },
-  { "word": "risks", "color": "yellow" },
-  { "word": "catch", "color": "yellow" },
-  { "word": "corrupt", "color": "darkviolet" },
-  { "word": "corrupted", "color": "darkviolet" },
-  { "word": "corrupts", "color": "darkviolet" },
-  { "word": "corrupting", "color": "darkviolet" },
-  { "word": "corruption", "color": "darkviolet" },
-  { "word": "corruptions", "color": "darkviolet" },
-  { "word": "edit", "color": "orchid" },
-  { "word": "label", "color": "red" },
-  { "word": "goto", "color": "red" },
-  { "word": "edits", "color": "orchid" },
-  { "word": "edited", "color": "orchid" },
-  { "word": "editing", "color": "orchid" },
-  { "word": "constitution", "color": "gold" },
-  { "word": "debug", "color": "firebrick" },
-  { "word": "test", "color": "mediumorchid" },
-  { "word": "version", "color": "steelblue" },
-  { "word": "branch", "color": "darkkhaki" },
-  { "word": "an", "color": "darkkhaki" },
-  { "word": "merge", "color": "mediumseagreen" },
-  { "word": "repository", "color": "plum" },
-  { "word": "commit", "color": "yellowgreen" },
-  { "word": "push", "color": "gold" },
-  { "word": "pull", "color": "darkslateblue" },
-  { "word": "clone", "color": "peru" },
-  { "word": "fork", "color": "seashell" },
-  { "word": "refactor", "color": "chartreuse" },
-  { "word": "dependency", "color": "teal" },
-  { "word": "dep", "color": "teal" },
-  { "word": "package", "color": "lightcoral" },
-  { "word": "library", "color": "mediumturquoise" },
-  { "word": "framework", "color": "mediumvioletred" },
-  { "word": "platform", "color": "crimson" },
-  { "word": "container", "color": "lightseagreen" },
-  { "word": "server", "color": "lightskyblue" },
-  { "word": "client", "color": "mediumslateblue" },
-  { "word": "api", "color": "powderblue" },
-  { "word": "request", "color": "forestgreen" },
-  { "word": "response", "color": "slategray" },
-  { "word": "json", "color": "mediumaquamarine" },
-  { "word": "xml", "color": "lightpink" },
-  { "word": "html", "color": "goldenrod" },
-  { "word": "css", "color": "indianred" },
-  { "word": "javascript", "color": "orange" },
-  { "word": "python", "color": "green" },
-  { "word": "ruby", "color": "crimson" },
-  { "word": "java", "color": "darkviolet" },
-  { "word": "csharp", "color": "seashell" },
-  { "word": "swift", "color": "lightyellow" },
-  { "word": "go", "color": "turquoise" },
-  { "word": "kotlin", "color": "lightgreen" },
-  { "word": "typescript", "color": "lightskyblue" },
-  { "word": "sql", "color": "palevioletred" },
-  { "word": "nosql", "color": "mediumorchid" },
-  { "word": "mongodb", "color": "mediumseagreen" },
-  { "word": "docker", "color": "mediumaquamarine" },
-  { "word": "kubernetes", "color": "lightcoral" },
-  { "word": "virtualization", "color": "plum" },
-  { "word": "cloud", "color": "lightsteelblue" },
-  { "word": "ci", "color": "mediumvioletred" },
-  { "word": "cd", "color": "mediumturquoise" },
-  { "word": "let", "color": "cornflowerblue" },
-  { "word": "var", "color": "darkslateblue" },
-  { "word": "const", "color": "mediumvioletred" },
-  { "word": "constant", "color": "mediumvioletred" },
-  { "word": "int", "color": "orangered" },
-  { "word": "integer", "color": "orangered" },
-  { "word": "string", "color": "mediumseagreen" },
-  { "word": "str", "color": "mediumseagreen" },
-  { "word": "bool", "color": "darkorange" },
-  { "word": "boolean", "color": "darkviolet" },
-  { "word": "float", "color": "lightseagreen" },
-  { "word": "double", "color": "steelblue" },
-  { "word": "char", "color": "gold" },
-  { "word": "list", "color": "lightsteelblue" },
-  { "word": "set", "color": "palevioletred" },
-  { "word": "map", "color": "mediumaquamarine" },
-  { "word": "tuple", "color": "plum" },
-  { "word": "dict", "color": "goldenrod" },
-  { "word": "byte", "color": "firebrick" },
-  { "word": "long", "color": "slateblue" },
-  { "word": "short", "color": "mediumturquoise" },
-  { "word": "unsigned", "color": "seashell" },
-  { "word": "void", "color": "chartreuse" },
-  { "word": "undefined", "color": "lightgoldenrodyellow" },
-  { "word": "instanceof", "color": "aquamarine" },
-  { "word": "typeof", "color": "skyblue" },
-  { "word": "getter", "color": "darkseagreen" },
-  { "word": "setter", "color": "orangered" },
-  { "word": "public", "color": "darkslategray" },
-  { "word": "private", "color": "indianred" },
-  { "word": "protected", "color": "goldenrod" },
-  { "word": "protection", "color": "goldenrod" },
-  { "word": "protections", "color": "goldenrod" },
-  { "word": "protector", "color": "goldenrod" },
-  { "word": "protect", "color": "goldenrod" },
-  { "word": "protecting", "color": "goldenrod" },
-  { "word": "protects", "color": "goldenrod" },
-  { "word": "important", "color": "goldenrod" },
-  { "word": "keep", "color": "orange" },
-  { "word": "keeping", "color": "orange" },
-  { "word": "free", "color": "lightgreen" },
-  { "word": "keeps", "color": "orange" },
-  { "word": "kept", "color": "orange" },
-  { "word": "relevant", "color": "goldenrod" },
-  { "word": "youtube", "color": "red" },
-  { "word": "twitter", "color": "skyblue" },
-  { "word": "X", "color": "gray" },
-  { "word": "snapchat", "color": "yellow" },
-  { "word": "twitch", "color": "purple" },
-  { "word": "kick", "color": "lightgreen" },
-  { "word": "TODO", "color": "gold" },
-  { "word": "insert", "color": "pink" },
-  { "word": "inserted", "color": "pink" },
-  { "word": "inserts", "color": "pink" },
-  { "word": "inserting", "color": "pink" },
-  { "word": "static", "color": "mediumorchid" },
-  { "word": "stay", "color": "mediumorchid" },
-  { "word": "stays", "color": "mediumorchid" },
-  { "word": "staying", "color": "mediumorchid" },
-  { "word": "stayed", "color": "mediumorchid" },
-  { "word": "later", "color": "mediumorchid" },
-  { "word": "final", "color": "lightsalmon" },
-  { "word": "immutable", "color": "palegreen" },
-  { "word": "volatile", "color": "lightyellow" },
-  { "word": "enum", "color": "mediumturquoise" },
-  { "word": "destroy", "color": "red" },
-  { "word": "any", "color": "lightgray" },
-  { "word": "any", "color": "lightgray" },
-  { "word": "create", "color": "lightgreen" },
-  { "word": "created", "color": "lightgreen" },
-  { "word": "creating", "color": "lightgreen" },
-  { "word": "allow", "color": "green" },
-  { "word": "allowed", "color": "green" },
-  { "word": "allows", "color": "green" },
-  { "word": "allowing", "color": "green" },
-  { "word": "deny", "color": "tomato" },
-  { "word": "denied", "color": "tomato" },
-  { "word": "denying", "color": "tomato" },
-  { "word": "many", "color": "chocolate" },
-  { "word": "much", "color": "orange" },
-  { "word": "very", "color": "purple" },
-  { "word": "decision", "color": "gray" }
+	{
+		"word": "the",
+		"color": "lightblue"
+	},
+	{
+		"word": "a",
+		"color": "crimson"
+	},
+	{
+		"word": "is",
+		"color": "gold"
+	},
+	{
+		"word": "are",
+		"color": "goldenrod"
+	},
+	{
+		"word": "was",
+		"color": "sandybrown"
+	},
+	{
+		"word": "were",
+		"color": "burlywood"
+	},
+	{
+		"word": "be",
+		"color": "khaki"
+	},
+	{
+		"word": "been",
+		"color": "navajowhite"
+	},
+	{
+		"word": "being",
+		"color": "wheat"
+	},
+	{
+		"word": "am",
+		"color": "lemonchiffon"
+	},
+	{
+		"word": "have",
+		"color": "mediumslateblue"
+	},
+	{
+		"word": "has",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "had",
+		"color": "orchid"
+	},
+	{
+		"word": "do",
+		"color": "lightcoral"
+	},
+	{
+		"word": "does",
+		"color": "salmon"
+	},
+	{
+		"word": "did",
+		"color": "lightsalmon"
+	},
+	{
+		"word": "add",
+		"color": "green"
+	},
+	{
+		"word": "adds",
+		"color": "green"
+	},
+	{
+		"word": "adding",
+		"color": "green"
+	},
+	{
+		"word": "added",
+		"color": "green"
+	},
+	{
+		"word": "subtract",
+		"color": "red"
+	},
+	{
+		"word": "subtracts",
+		"color": "red"
+	},
+	{
+		"word": "subtracting",
+		"color": "red"
+	},
+	{
+		"word": "subtracted",
+		"color": "red"
+	},
+	{
+		"word": "divide",
+		"color": "orange"
+	},
+	{
+		"word": "divides",
+		"color": "orange"
+	},
+	{
+		"word": "divides",
+		"color": "orange"
+	},
+	{
+		"word": "dividing",
+		"color": "orange"
+	},
+	{
+		"word": "divided",
+		"color": "orange"
+	},
+	{
+		"word": "multiply",
+		"color": "lightgreen"
+	},
+	{
+		"word": "multiplies",
+		"color": "lightgreen"
+	},
+	{
+		"word": "multiplying",
+		"color": "lightgreen"
+	},
+	{
+		"word": "multiplied",
+		"color": "lightgreen"
+	},
+	{
+		"word": "will",
+		"color": "lightgreen"
+	},
+	{
+		"word": "shall",
+		"color": "mediumspringgreen"
+	},
+	{
+		"word": "effective",
+		"color": "mediumspringgreen"
+	},
+	{
+		"word": "useful",
+		"color": "mediumspringgreen"
+	},
+	{
+		"word": "would",
+		"color": "cornflowerblue"
+	},
+	{
+		"word": "should",
+		"color": "darkseagreen"
+	},
+	{
+		"word": "can",
+		"color": "mediumturquoise"
+	},
+	{
+		"word": "could",
+		"color": "powderblue"
+	},
+	{
+		"word": "may",
+		"color": "aquamarine"
+	},
+	{
+		"word": "might",
+		"color": "lightcyan"
+	},
+	{
+		"word": "must",
+		"color": "paleturquoise"
+	},
+	{
+		"word": "now",
+		"color": "deepskyblue"
+	},
+	{
+		"word": "then",
+		"color": "steelblue"
+	},
+	{
+		"word": "and",
+		"color": "limegreen"
+	},
+	{
+		"word": "or",
+		"color": "mediumspringgreen"
+	},
+	{
+		"word": "but",
+		"color": "palevioletred"
+	},
+	{
+		"word": "not",
+		"color": "indianred"
+	},
+	{
+		"word": "this",
+		"color": "darkorange"
+	},
+	{
+		"word": "self",
+		"color": "darkorange"
+	},
+	{
+		"word": "itself",
+		"color": "darkorange"
+	},
+	{
+		"word": "section",
+		"color": "pink"
+	},
+	{
+		"word": "title",
+		"color": "pink"
+	},
+	{
+		"word": "anti",
+		"color": "tomato"
+	},
+	{
+		"word": "non",
+		"color": "tomato"
+	},
+	{
+		"word": "that",
+		"color": "darkorange"
+	},
+	{
+		"word": "it",
+		"color": "violet"
+	},
+	{
+		"word": "its",
+		"color": "violet"
+	},
+	{
+		"word": "it's",
+		"color": "violet"
+	},
+	{
+		"word": "i",
+		"color": "orchid"
+	},
+	{
+		"word": "i'm",
+		"color": "orchid"
+	},
+	{
+		"word": "i’ve",
+		"color": "orchid"
+	},
+	{
+		"word": "i’d",
+		"color": "orchid"
+	},
+	{
+		"word": "i’ll",
+		"color": "orchid"
+	},
+	{
+		"word": "my",
+		"color": "violet"
+	},
+	{
+		"word": "mine",
+		"color": "violet"
+	},
+	{
+		"word": "myself",
+		"color": "violet"
+	},
+	{
+		"word": "you",
+		"color": "turquoise"
+	},
+	{
+		"word": "you're",
+		"color": "turquoise"
+	},
+	{
+		"word": "you’ve",
+		"color": "turquoise"
+	},
+	{
+		"word": "you’ll",
+		"color": "turquoise"
+	},
+	{
+		"word": "your",
+		"color": "turquoise"
+	},
+	{
+		"word": "yours",
+		"color": "turquoise"
+	},
+	{
+		"word": "yourself",
+		"color": "turquoise"
+	},
+	{
+		"word": "he",
+		"color": "lightskyblue"
+	},
+	{
+		"word": "his",
+		"color": "lightskyblue"
+	},
+	{
+		"word": "him",
+		"color": "lightskyblue"
+	},
+	{
+		"word": "himself",
+		"color": "lightskyblue"
+	},
+	{
+		"word": "she",
+		"color": "plum"
+	},
+	{
+		"word": "her",
+		"color": "plum"
+	},
+	{
+		"word": "hers",
+		"color": "plum"
+	},
+	{
+		"word": "herself",
+		"color": "plum"
+	},
+	{
+		"word": "we",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "we're",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "our",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "us",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "ours",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "ourselves",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "they",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "appreciate",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "operating",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "they're",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "their",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "theirs",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "them",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "themselves",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "to",
+		"color": "deepskyblue"
+	},
+	{
+		"word": "of",
+		"color": "coral"
+	},
+	{
+		"word": "in",
+		"color": "palegreen"
+	},
+	{
+		"word": "out",
+		"color": "tomato"
+	},
+	{
+		"word": "system",
+		"color": "darkviolet"
+	},
+	{
+		"word": "on",
+		"color": "mediumseagreen"
+	},
+	{
+		"word": "for",
+		"color": "dodgerblue"
+	},
+	{
+		"word": "while",
+		"color": "lightblue"
+	},
+	{
+		"word": "with",
+		"color": "tomato"
+	},
+	{
+		"word": "new",
+		"color": "yellow"
+	},
+	{
+		"word": "if",
+		"color": "greenyellow"
+	},
+	{
+		"word": "something",
+		"color": "lightgray"
+	},
+	{
+		"word": "some",
+		"color": "lightgray"
+	},
+	{
+		"word": "because",
+		"color": "darkkhaki"
+	},
+	{
+		"word": "as",
+		"color": "skyblue"
+	},
+	{
+		"word": "at",
+		"color": "turquoise"
+	},
+	{
+		"word": "func",
+		"color": "turquoise"
+	},
+	{
+		"word": "fn",
+		"color": "greenyellow"
+	},
+	{
+		"word": "by",
+		"color": "lightpink"
+	},
+	{
+		"word": "from",
+		"color": "mediumaquamarine"
+	},
+	{
+		"word": "what",
+		"color": "red"
+	},
+	{
+		"word": "file",
+		"color": "tomato"
+	},
+	{
+		"word": "when",
+		"color": "orange"
+	},
+	{
+		"word": "whenever",
+		"color": "orange"
+	},
+	{
+		"word": "def",
+		"color": "orange"
+	},
+	{
+		"word": "define",
+		"color": "orange"
+	},
+	{
+		"word": "find",
+		"color": "lightgray"
+	},
+	{
+		"word": "literally",
+		"color": "gold"
+	},
+	{
+		"word": "start",
+		"color": "lightgreen"
+	},
+	{
+		"word": "stop",
+		"color": "red"
+	},
+	{
+		"word": "about",
+		"color": "lightyellow"
+	},
+	{
+		"word": "object",
+		"color": "lightpink"
+	},
+	{
+		"word": "each",
+		"color": "darkorange"
+	},
+	{
+		"word": "those",
+		"color": "lightcoral"
+	},
+	{
+		"word": "there",
+		"color": "slategray"
+	},
+	{
+		"word": "here",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "all",
+		"color": "yellowgreen"
+	},
+	{
+		"word": "some",
+		"color": "darksalmon"
+	},
+	{
+		"word": "few",
+		"color": "powderblue"
+	},
+	{
+		"word": "none",
+		"color": "indianred"
+	},
+	{
+		"word": "love",
+		"color": "pink"
+	},
+	{
+		"word": "hate",
+		"color": "firebrick"
+	},
+	{
+		"word": "enjoy",
+		"color": "seashell"
+	},
+	{
+		"word": "prefer",
+		"color": "peachpuff"
+	},
+	{
+		"word": "after",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "before",
+		"color": "orangered"
+	},
+	{
+		"word": "around",
+		"color": "fuchsia"
+	},
+	{
+		"word": "like",
+		"color": "fuchsia"
+	},
+	{
+		"word": "similar",
+		"color": "fuchsia"
+	},
+	{
+		"word": "above",
+		"color": "darkgoldenrod"
+	},
+	{
+		"word": "below",
+		"color": "peru"
+	},
+	{
+		"word": "always",
+		"color": "turquoise"
+	},
+	{
+		"word": "sometimes",
+		"color": "slateblue"
+	},
+	{
+		"word": "never",
+		"color": "chocolate"
+	},
+	{
+		"word": "usually",
+		"color": "plum"
+	},
+	{
+		"word": "rarely",
+		"color": "lime"
+	},
+	{
+		"word": "rare",
+		"color": "lime"
+	},
+	{
+		"word": "result",
+		"color": "plum"
+	},
+	{
+		"word": "results",
+		"color": "plum"
+	},
+	{
+		"word": "resulting",
+		"color": "plum"
+	},
+	{
+		"word": "resulted",
+		"color": "plum"
+	},
+	{
+		"word": "sum",
+		"color": "plum"
+	},
+	{
+		"word": "summary",
+		"color": "plum"
+	},
+	{
+		"word": "together",
+		"color": "plum"
+	},
+	{
+		"word": "apart",
+		"color": "seashell"
+	},
+	{
+		"word": "again",
+		"color": "lightcyan"
+	},
+	{
+		"word": "first",
+		"color": "wheat"
+	},
+	{
+		"word": "last",
+		"color": "seashell"
+	},
+	{
+		"word": "next",
+		"color": "mediumvioletred"
+	},
+	{
+		"word": "yes",
+		"color": "forestgreen"
+	},
+	{
+		"word": "no",
+		"color": "tomato"
+	},
+	{
+		"word": "null",
+		"color": "crimson"
+	},
+	{
+		"word": "function",
+		"color": "mediumseagreen"
+	},
+	{
+		"word": "variable",
+		"color": "orangered"
+	},
+	{
+		"word": "class",
+		"color": "mediumslateblue"
+	},
+	{
+		"word": "product",
+		"color": "mediumslateblue"
+	},
+	{
+		"word": "quotient",
+		"color": "mediumslateblue"
+	},
+	{
+		"word": "method",
+		"color": "indianred"
+	},
+	{
+		"word": "array",
+		"color": "lightcoral"
+	},
+	{
+		"word": "loop",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "else",
+		"color": "mediumslateblue"
+	},
+	{
+		"word": "switch",
+		"color": "darkorange"
+	},
+	{
+		"word": "case",
+		"color": "lightpink"
+	},
+	{
+		"word": "break",
+		"color": "tomato"
+	},
+	{
+		"word": "continue",
+		"color": "forestgreen"
+	},
+	{
+		"word": "return",
+		"color": "violet"
+	},
+	{
+		"word": "import",
+		"color": "powderblue"
+	},
+	{
+		"word": "use",
+		"color": "powderblue"
+	},
+	{
+		"word": "require",
+		"color": "powderblue"
+	},
+	{
+		"word": "requires",
+		"color": "powderblue"
+	},
+	{
+		"word": "using",
+		"color": "powderblue"
+	},
+	{
+		"word": "used",
+		"color": "powderblue"
+	},
+	{
+		"word": "needs",
+		"color": "powderblue"
+	},
+	{
+		"word": "needed",
+		"color": "powderblue"
+	},
+	{
+		"word": "necessary",
+		"color": "powderblue"
+	},
+	{
+		"word": "export",
+		"color": "mediumpurple"
+	},
+	{
+		"word": "module",
+		"color": "lightcoral"
+	},
+	{
+		"word": "promise",
+		"color": "lightyellow"
+	},
+	{
+		"word": "async",
+		"color": "limegreen"
+	},
+	{
+		"word": "await",
+		"color": "deepskyblue"
+	},
+	{
+		"word": "callback",
+		"color": "seashell"
+	},
+	{
+		"word": "constructor",
+		"color": "darkgoldenrod"
+	},
+	{
+		"word": "inheritance",
+		"color": "crimson"
+	},
+	{
+		"word": "polymorphism",
+		"color": "chartreuse"
+	},
+	{
+		"word": "encapsulation",
+		"color": "darkslategray"
+	},
+	{
+		"word": "abstraction",
+		"color": "yellowgreen"
+	},
+	{
+		"word": "interface",
+		"color": "violet"
+	},
+	{
+		"word": "instance",
+		"color": "peru"
+	},
+	{
+		"word": "implementation",
+		"color": "lightblue"
+	},
+	{
+		"word": "data",
+		"color": "cornflowerblue"
+	},
+	{
+		"word": "structure",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "decide",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "queue",
+		"color": "mediumaquamarine"
+	},
+	{
+		"word": "stack",
+		"color": "lightgoldenrodyellow"
+	},
+	{
+		"word": "graph",
+		"color": "mediumvioletred"
+	},
+	{
+		"word": "tree",
+		"color": "forestgreen"
+	},
+	{
+		"word": "node",
+		"color": "indigo"
+	},
+	{
+		"word": "need",
+		"color": "violet"
+	},
+	{
+		"word": "algorithm",
+		"color": "darkorange"
+	},
+	{
+		"word": "complexity",
+		"color": "lightcyan"
+	},
+	{
+		"word": "runtime",
+		"color": "lightpink"
+	},
+	{
+		"word": "error",
+		"color": "red"
+	},
+	{
+		"word": "exception",
+		"color": "darkviolet"
+	},
+	{
+		"word": "except",
+		"color": "darkviolet"
+	},
+	{
+		"word": "try",
+		"color": "yellow"
+	},
+	{
+		"word": "risk",
+		"color": "yellow"
+	},
+	{
+		"word": "risking",
+		"color": "yellow"
+	},
+	{
+		"word": "risked",
+		"color": "yellow"
+	},
+	{
+		"word": "risks",
+		"color": "yellow"
+	},
+	{
+		"word": "catch",
+		"color": "yellow"
+	},
+	{
+		"word": "corrupt",
+		"color": "darkviolet"
+	},
+	{
+		"word": "corrupted",
+		"color": "darkviolet"
+	},
+	{
+		"word": "corrupts",
+		"color": "darkviolet"
+	},
+	{
+		"word": "corrupting",
+		"color": "darkviolet"
+	},
+	{
+		"word": "corruption",
+		"color": "darkviolet"
+	},
+	{
+		"word": "corruptions",
+		"color": "darkviolet"
+	},
+	{
+		"word": "edit",
+		"color": "orchid"
+	},
+	{
+		"word": "label",
+		"color": "red"
+	},
+	{
+		"word": "goto",
+		"color": "red"
+	},
+	{
+		"word": "edits",
+		"color": "orchid"
+	},
+	{
+		"word": "edited",
+		"color": "orchid"
+	},
+	{
+		"word": "editing",
+		"color": "orchid"
+	},
+	{
+		"word": "constitution",
+		"color": "gold"
+	},
+	{
+		"word": "debug",
+		"color": "firebrick"
+	},
+	{
+		"word": "test",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "version",
+		"color": "steelblue"
+	},
+	{
+		"word": "branch",
+		"color": "darkkhaki"
+	},
+	{
+		"word": "an",
+		"color": "darkkhaki"
+	},
+	{
+		"word": "merge",
+		"color": "mediumseagreen"
+	},
+	{
+		"word": "repository",
+		"color": "plum"
+	},
+	{
+		"word": "commit",
+		"color": "yellowgreen"
+	},
+	{
+		"word": "push",
+		"color": "gold"
+	},
+	{
+		"word": "pull",
+		"color": "darkslateblue"
+	},
+	{
+		"word": "clone",
+		"color": "peru"
+	},
+	{
+		"word": "fork",
+		"color": "seashell"
+	},
+	{
+		"word": "refactor",
+		"color": "chartreuse"
+	},
+	{
+		"word": "dependency",
+		"color": "teal"
+	},
+	{
+		"word": "dep",
+		"color": "teal"
+	},
+	{
+		"word": "package",
+		"color": "lightcoral"
+	},
+	{
+		"word": "library",
+		"color": "mediumturquoise"
+	},
+	{
+		"word": "framework",
+		"color": "mediumvioletred"
+	},
+	{
+		"word": "platform",
+		"color": "crimson"
+	},
+	{
+		"word": "container",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "server",
+		"color": "lightskyblue"
+	},
+	{
+		"word": "client",
+		"color": "mediumslateblue"
+	},
+	{
+		"word": "api",
+		"color": "powderblue"
+	},
+	{
+		"word": "request",
+		"color": "forestgreen"
+	},
+	{
+		"word": "response",
+		"color": "slategray"
+	},
+	{
+		"word": "json",
+		"color": "mediumaquamarine"
+	},
+	{
+		"word": "xml",
+		"color": "lightpink"
+	},
+	{
+		"word": "html",
+		"color": "goldenrod"
+	},
+	{
+		"word": "css",
+		"color": "indianred"
+	},
+	{
+		"word": "javascript",
+		"color": "orange"
+	},
+	{
+		"word": "python",
+		"color": "green"
+	},
+	{
+		"word": "ruby",
+		"color": "crimson"
+	},
+	{
+		"word": "java",
+		"color": "darkviolet"
+	},
+	{
+		"word": "csharp",
+		"color": "seashell"
+	},
+	{
+		"word": "swift",
+		"color": "lightyellow"
+	},
+	{
+		"word": "go",
+		"color": "turquoise"
+	},
+	{
+		"word": "kotlin",
+		"color": "lightgreen"
+	},
+	{
+		"word": "typescript",
+		"color": "lightskyblue"
+	},
+	{
+		"word": "sql",
+		"color": "palevioletred"
+	},
+	{
+		"word": "nosql",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "mongodb",
+		"color": "mediumseagreen"
+	},
+	{
+		"word": "docker",
+		"color": "mediumaquamarine"
+	},
+	{
+		"word": "kubernetes",
+		"color": "lightcoral"
+	},
+	{
+		"word": "virtualization",
+		"color": "plum"
+	},
+	{
+		"word": "cloud",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "ci",
+		"color": "mediumvioletred"
+	},
+	{
+		"word": "cd",
+		"color": "mediumturquoise"
+	},
+	{
+		"word": "let",
+		"color": "cornflowerblue"
+	},
+	{
+		"word": "var",
+		"color": "darkslateblue"
+	},
+	{
+		"word": "const",
+		"color": "mediumvioletred"
+	},
+	{
+		"word": "constant",
+		"color": "mediumvioletred"
+	},
+	{
+		"word": "int",
+		"color": "orangered"
+	},
+	{
+		"word": "integer",
+		"color": "orangered"
+	},
+	{
+		"word": "string",
+		"color": "mediumseagreen"
+	},
+	{
+		"word": "str",
+		"color": "mediumseagreen"
+	},
+	{
+		"word": "bool",
+		"color": "darkorange"
+	},
+	{
+		"word": "boolean",
+		"color": "darkviolet"
+	},
+	{
+		"word": "float",
+		"color": "lightseagreen"
+	},
+	{
+		"word": "double",
+		"color": "steelblue"
+	},
+	{
+		"word": "char",
+		"color": "gold"
+	},
+	{
+		"word": "list",
+		"color": "lightsteelblue"
+	},
+	{
+		"word": "set",
+		"color": "palevioletred"
+	},
+	{
+		"word": "map",
+		"color": "mediumaquamarine"
+	},
+	{
+		"word": "tuple",
+		"color": "plum"
+	},
+	{
+		"word": "dict",
+		"color": "goldenrod"
+	},
+	{
+		"word": "byte",
+		"color": "firebrick"
+	},
+	{
+		"word": "long",
+		"color": "slateblue"
+	},
+	{
+		"word": "short",
+		"color": "mediumturquoise"
+	},
+	{
+		"word": "unsigned",
+		"color": "seashell"
+	},
+	{
+		"word": "void",
+		"color": "chartreuse"
+	},
+	{
+		"word": "undefined",
+		"color": "lightgoldenrodyellow"
+	},
+	{
+		"word": "instanceof",
+		"color": "aquamarine"
+	},
+	{
+		"word": "typeof",
+		"color": "skyblue"
+	},
+	{
+		"word": "getter",
+		"color": "darkseagreen"
+	},
+	{
+		"word": "setter",
+		"color": "orangered"
+	},
+	{
+		"word": "public",
+		"color": "darkslategray"
+	},
+	{
+		"word": "private",
+		"color": "indianred"
+	},
+	{
+		"word": "protected",
+		"color": "goldenrod"
+	},
+	{
+		"word": "protection",
+		"color": "goldenrod"
+	},
+	{
+		"word": "protections",
+		"color": "goldenrod"
+	},
+	{
+		"word": "protector",
+		"color": "goldenrod"
+	},
+	{
+		"word": "protect",
+		"color": "goldenrod"
+	},
+	{
+		"word": "protecting",
+		"color": "goldenrod"
+	},
+	{
+		"word": "protects",
+		"color": "goldenrod"
+	},
+	{
+		"word": "important",
+		"color": "goldenrod"
+	},
+	{
+		"word": "keep",
+		"color": "orange"
+	},
+	{
+		"word": "keeping",
+		"color": "orange"
+	},
+	{
+		"word": "free",
+		"color": "lightgreen"
+	},
+	{
+		"word": "keeps",
+		"color": "orange"
+	},
+	{
+		"word": "kept",
+		"color": "orange"
+	},
+	{
+		"word": "relevant",
+		"color": "goldenrod"
+	},
+	{
+		"word": "youtube",
+		"color": "red"
+	},
+	{
+		"word": "twitter",
+		"color": "skyblue"
+	},
+	{
+		"word": "X",
+		"color": "gray"
+	},
+	{
+		"word": "snapchat",
+		"color": "yellow"
+	},
+	{
+		"word": "twitch",
+		"color": "purple"
+	},
+	{
+		"word": "kick",
+		"color": "lightgreen"
+	},
+	{
+		"word": "TODO",
+		"color": "gold"
+	},
+	{
+		"word": "insert",
+		"color": "pink"
+	},
+	{
+		"word": "inserted",
+		"color": "pink"
+	},
+	{
+		"word": "inserts",
+		"color": "pink"
+	},
+	{
+		"word": "inserting",
+		"color": "pink"
+	},
+	{
+		"word": "static",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "stay",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "stays",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "staying",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "stayed",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "later",
+		"color": "mediumorchid"
+	},
+	{
+		"word": "final",
+		"color": "lightsalmon"
+	},
+	{
+		"word": "immutable",
+		"color": "palegreen"
+	},
+	{
+		"word": "volatile",
+		"color": "lightyellow"
+	},
+	{
+		"word": "enum",
+		"color": "mediumturquoise"
+	},
+	{
+		"word": "destroy",
+		"color": "red"
+	},
+	{
+		"word": "any",
+		"color": "lightgray"
+	},
+	{
+		"word": "any",
+		"color": "lightgray"
+	},
+	{
+		"word": "create",
+		"color": "lightgreen"
+	},
+	{
+		"word": "created",
+		"color": "lightgreen"
+	},
+	{
+		"word": "creating",
+		"color": "lightgreen"
+	},
+	{
+		"word": "allow",
+		"color": "green"
+	},
+	{
+		"word": "allowed",
+		"color": "green"
+	},
+	{
+		"word": "allows",
+		"color": "green"
+	},
+	{
+		"word": "allowing",
+		"color": "green"
+	},
+	{
+		"word": "deny",
+		"color": "tomato"
+	},
+	{
+		"word": "denied",
+		"color": "tomato"
+	},
+	{
+		"word": "denying",
+		"color": "tomato"
+	},
+	{
+		"word": "many",
+		"color": "chocolate"
+	},
+	{
+		"word": "much",
+		"color": "orange"
+	},
+	{
+		"word": "very",
+		"color": "purple"
+	},
+	{
+		"word": "decision",
+		"color": "gray"
+	},
+	{
+		"word": "media",
+		"color": "lightyellow"
+	},
+	{
+		"word": "instagram",
+		"color": "orange"
+	},
+	{
+		"word": "facebook",
+		"color": "skyblue"
+	}
 ]
