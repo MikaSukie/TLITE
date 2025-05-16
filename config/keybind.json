@@ -1,7 +1,7 @@
 {
     "new_file": "Ctrl+N",
     "open_file": "Ctrl+O",
-    "save_file": "Ctrl+S",
+    "save_file": "Ctrl+Alt+S",
     "save_as_file": "Ctrl+Shift+S",
     "reload_rules": "Ctrl+L",
     "reload_all_rules": "Ctrl+R",
@@ -16,5 +16,7 @@
     "change_line_spacing": "None",
     "outline_none": "None",
     "outline_a4": "None",
-    "outline_iso216": "None"
+    "outline_iso216": "None",
+    "toggle_suggestions": "Ctrl+Space",
+    "save_raw_file": "Ctrl+S"
 }
