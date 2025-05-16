@@ -792,8 +792,47 @@ class MainWindow(QMainWindow):
         try:
             path = self.file_model.filePath(index)
             if os.path.isfile(path):
-                allowed_exts = {'.txt', '.tlxt', '.py', '.md', '.json', '.csv', '.java', '.rs', '.cpp', '.css', '.js',
-                                '.html', '.c', '.cs'}
+                allowed_exts = {
+                    '.txt', '.tlxt', '.md', '.rst', '.adoc', '.asciidoc', '.asc',
+                    '.py', '.pyw', '.pyc', '.pyi', '.pypp',
+                    '.java', '.class',
+                    '.rs',
+                    '.cpp', '.cxx', '.cc', '.c', '.h', '.hpp', '.hh', '.hxx',
+                    '.cs',
+                    '.js', '.jsx', '.ts', '.tsx',
+                    '.html', '.htm', '.xhtml',
+                    '.css', '.scss', '.sass', '.less',
+                    '.json', '.json5', '.geojson',
+                    '.csv',
+                    '.xml',
+                    '.yml', '.yaml',
+                    '.toml',
+                    '.ini', '.conf', '.cfg',
+                    '.sh', '.bash', '.zsh', '.fish', '.csh', '.tcsh',
+                    '.bat', '.cmd',
+                    '.ps1',
+                    '.php', '.php3', '.php4', '.php5', '.phtml',
+                    '.pl', '.pm',
+                    '.rb', '.rake',
+                    '.swift',
+                    '.kt', '.kts',
+                    '.scala',
+                    '.groovy',
+                    '.hs',
+                    '.lua',
+                    '.m',
+                    '.vb',
+                    '.sql',
+                    '.gradle',
+                    '.makefile', '.mk',
+                    '.dockerfile',
+                    '.gitignore',
+                    '.log',
+                    '.diff', '.patch',
+                    '.vim', '.vimrc',
+                    '.tex',
+                    '.awe', '.orcat', '.sorcat', '.vem'
+                }
                 ext = os.path.splitext(path)[1].lower()
                 if ext not in allowed_exts:
                     QMessageBox.warning(self, "Unsupported File", f"File type '{ext}' is not supported.")
@@ -837,8 +876,48 @@ class MainWindow(QMainWindow):
                 "Text Files (*.txt *.tlxt *.py *.md *.json *.csv *.java *.class *.rs *.cpp *.css *.js *.html *.c *.cs);;All Files (*)"
             )
             if path:
-                allowed_exts = {'.txt', '.tlxt', '.py', '.md', '.json', '.csv', '.java', '.rs', '.cpp', '.css', '.js',
-                                '.html', '.c', '.cs'}
+                allowed_exts = {
+                    '.txt', '.tlxt', '.md', '.rst', '.adoc', '.asciidoc', '.asc',
+                    '.py', '.pyw', '.pyc', '.pyi', '.pypp',
+                    '.java', '.class',
+                    '.rs',
+                    '.cpp', '.cxx', '.cc', '.c', '.h', '.hpp', '.hh', '.hxx',
+                    '.cs',
+                    '.js', '.jsx', '.ts', '.tsx',
+                    '.html', '.htm', '.xhtml',
+                    '.css', '.scss', '.sass', '.less',
+                    '.json', '.json5', '.geojson',
+                    '.csv',
+                    '.xml',
+                    '.yml', '.yaml',
+                    '.toml',
+                    '.ini', '.conf', '.cfg',
+                    '.sh', '.bash', '.zsh', '.fish', '.csh', '.tcsh',
+                    '.bat', '.cmd',
+                    '.ps1',
+                    '.php', '.php3', '.php4', '.php5', '.phtml',
+                    '.pl', '.pm',
+                    '.rb', '.rake',
+                    '.swift',
+                    '.kt', '.kts',
+                    '.scala',
+                    '.groovy',
+                    '.hs',
+                    '.lua',
+                    '.m',
+                    '.vb',
+                    '.sql',
+                    '.gradle',
+                    '.makefile', '.mk',
+                    '.dockerfile',
+                    '.gitignore',
+                    '.log',
+                    '.diff', '.patch',
+                    '.vim', '.vimrc',
+                    '.tex',
+                    '.awe', '.orcat', '.sorcat', '.vem'
+                }
+
                 ext = os.path.splitext(path)[1].lower()
                 if ext not in allowed_exts:
                     QMessageBox.warning(self, "Unsupported File", f"File type '{ext}' is not supported.")
