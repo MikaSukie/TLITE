@@ -10,7 +10,7 @@ QTextEdit {
     border: none;
     selection-background-color: #264f78;
     padding: 10px;
-    border-radius: 6px;
+    border-radius: 8px;
     outline: none;
 }
 
@@ -19,7 +19,6 @@ QScrollBar:vertical, QScrollBar:horizontal {
     border: none;
     width: 12px;
     height: 12px;
-    margin: 0px;
     border-radius: 6px;
 }
 
@@ -48,12 +47,13 @@ QMenuBar {
 }
 
 QMenuBar::item {
-    padding: 4px 12px;
+    padding: 6px 14px;
     background-color: transparent;
 }
 
 QMenuBar::item:selected {
     background-color: #3e3e42;
+    border-radius: 4px;
 }
 
 QMenu {
@@ -64,7 +64,8 @@ QMenu {
 }
 
 QMenu::item {
-    padding: 6px 20px;
+    padding: 8px 20px;
+    border-radius: 4px;
 }
 
 QMenu::item:selected {
@@ -74,23 +75,23 @@ QMenu::item:selected {
 
 QStatusBar {
     color: #ffffff;
-    background-color: transparent;
-    padding: 2px 6px;
+    background-color: #252526;
+    padding: 4px 8px;
+    border-top: 1px solid #333;
     font-weight: normal;
 }
 
 QCheckBox {
     color: #ffffff;
-    background-color: transparent;
-    padding: 2px 6px;
-    font-weight: normal;
+    padding: 4px;
+    spacing: 6px;
 }
 
 QListView {
     background-color: #2d2d30;
     color: #ffffff;
     border: 1px solid #444;
-    padding: 4px;
+    padding: 6px;
     font-family: Consolas, Courier, monospace;
     font-size: 13pt;
     selection-background-color: #007acc;
@@ -98,35 +99,77 @@ QListView {
     outline: none;
 }
 
-QDialog, QMessageBox, QInputDialog {
+QTreeView {
+    background-color: #252526;
+    color: #ffffff;
+    alternate-background-color: #2a2d2e;
+    border: 1px solid #333;
+    padding: 4px;
+    font-size: 13pt;
+    selection-background-color: #007acc;
+    selection-color: #ffffff;
+}
+
+QTreeView::item {
+    color: #ffffff
+    padding: 4px 8px;
+    margin: 2px 0;
+}
+
+QTreeView::item:selected {
+    background-color: #ffffff;
+    color: white;
+    border-radius: 4px;
+}
+
+QPlainTextEdit {
+    background-color: #1e1e1e;
+    color: white;
+    font-family: Consolas, Courier, monospace;
+    font-size: 12pt;
+    border: 1px solid #333;
+}
+
+QLineEdit {
+    background-color: #2d2d30;
+    color: white;
+    border: 1px solid #555;
+    padding: 4px;
+    font-size: 11pt;
+}
+
+QDockWidget {
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    titlebar-close-icon: url(none);
+    titlebar-normal-icon: url(none);
+}
+
+QDockWidget::title {
     background-color: #2d2d30;
     color: #ffffff;
-    border: 1px solid #444;
+    padding: 4px;
+    font-weight: bold;
+    text-align: left;
 }
 
-QDialog QLabel, QMessageBox QLabel, QInputDialog QLabel {
-    color: #ffffff;
-    font-size: 12pt;
-}
-
-QDialog QPushButton, QMessageBox QPushButton, QInputDialog QPushButton {
-    background-color: #3e3e42;
+QLineEdit {
+    background-color: #2d2d30;
     color: #ffffff;
     border: 1px solid #555;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 13pt;
+}
+
+QPushButton {
+    background-color: #007acc;
+    color: white;
+    border: none;
     padding: 6px 12px;
     border-radius: 4px;
 }
 
-QDialog QPushButton:hover, QMessageBox QPushButton:hover, QInputDialog QPushButton:hover {
-    background-color: #007acc;
-    border: 1px solid #007acc;
-}
-
-QLineEdit {
-    background-color: #1e1e1e;
-    color: #ffffff;
-    border: 1px solid #444;
-    padding: 4px 6px;
-    border-radius: 4px;
-    selection-background-color: #264f78;
+QPushButton:hover {
+    background-color: #2899f5;
 }
