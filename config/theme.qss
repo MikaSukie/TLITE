@@ -14,6 +14,33 @@ QTextEdit {
     outline: none;
 }
 
+QPlainTextEdit {
+    background-color: #292D3E;
+    color: #A6ACCD;
+    font-family: Consolas, Courier, monospace;
+    font-size: 12pt;
+    border: 1px solid #444267;
+    padding: 10px;
+}
+
+QLineEdit {
+    background-color: #2B2F44;
+    color: #A6ACCD;
+    border: 1px solid #444267;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 13pt;
+}
+
+QComboBox {
+    background-color: #2B2F44;
+    color: #A6ACCD;
+    border: 1px solid #444267;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 13pt;
+}
+
 QScrollBar:vertical, QScrollBar:horizontal {
     background: #1E2235;
     border: none;
@@ -124,21 +151,30 @@ QTreeView::item:selected {
     border-radius: 4px;
 }
 
-QPlainTextEdit {
-    background-color: #292D3E;
+QDialog, QMessageBox, QInputDialog {
+    background-color: #1E2235;
     color: #A6ACCD;
-    font-family: Consolas, Courier, monospace;
-    font-size: 12pt;
     border: 1px solid #444267;
 }
 
-QLineEdit {
-    background-color: #2B2F44;
+QDialog QLabel, QMessageBox QLabel, QInputDialog QLabel {
     color: #A6ACCD;
-    border: 1px solid #444267;
-    padding: 6px;
+    font-size: 12pt;
+}
+
+QDialog QPushButton, QMessageBox QPushButton, QInputDialog QPushButton {
+    background-color: #3E3E42;
+    color: #FFFFFF;
+    border: 1px solid #555;
+    padding: 6px 12px;
     border-radius: 4px;
-    font-size: 13pt;
+    transition: background-color 0.2s ease;
+}
+
+QDialog QPushButton:hover, QMessageBox QPushButton:hover, QInputDialog QPushButton:hover {
+    background-color: #82AAFF;
+    border: 1px solid #82AAFF;
+    color: #292D3E;
 }
 
 QDockWidget {
@@ -160,7 +196,6 @@ QDockWidget QLabel {
     color: white;
 }
 
-
 QDockWidget QAbstractButton {
     background-color: #7C83E6;
     color: white;
@@ -177,7 +212,7 @@ QDockWidget QAbstractButton QLabel {
 
 QDockWidget QAbstractButton:hover {
     background-color: #7C83E6;
-    color: #7C83E6;
+    color: white;
 }
 
 QPushButton {
@@ -186,6 +221,7 @@ QPushButton {
     border: none;
     padding: 6px 12px;
     border-radius: 4px;
+    transition: background-color 0.2s ease;
 }
 
 QPushButton:hover {
