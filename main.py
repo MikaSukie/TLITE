@@ -5,7 +5,7 @@ import subprocess
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QTextEdit, QFileDialog, QAction, QInputDialog, QFontDialog, QDesktopWidget, QStatusBar,
     QHBoxLayout, QPushButton, QCheckBox, QLabel, QLineEdit, QVBoxLayout, QWidget, QDockWidget, QDialog, QMessageBox,
-    QCompleter, QTreeView, QFileSystemModel, QPlainTextEdit
+    QCompleter, QTreeView, QFileSystemModel, QPlainTextEdit, QTabWidget, QTabBar
 )
 from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont, QTextBlockFormat, QPainter, QPen, \
     QTextDocument, QTextCursor
@@ -43,6 +43,14 @@ def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
     return os.path.join(base_path, relative_path)
 
+class PlaceholderTab(QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout(self)
+        label = QLabel("📄 No document open.\nUse 'File > New' or 'Open' to get started.")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("color: gray; font-size: 16px;")
+        layout.addWidget(label)
 
 class KeybindEditorDialog(QDialog):
     def __init__(self, keybinds, parent=None):
@@ -258,20 +266,48 @@ class CustomTextEdit(QTextEdit):
         else:
             self.completer.popup().hide()
 
+class TextEditorTab(QWidget):
+    def __init__(self, get_plain_paste_callback):
+        super().__init__()
+        layout = QVBoxLayout(self)
+        self.editor = CustomTextEdit(get_plain_paste_callback)
+        self.editor.setFont(QFont("Consolas", 14))
+        self.sentence_per_paragraph = 3
+        self.editor.textChanged.connect(self.update_counters)
+        layout.addWidget(self.editor)
+        self.linter = EnglishLinter(self.editor.document())
+        self.path = None
+
+    def update_counters(self):
+        text = self.editor.toPlainText()
+        word_count = len(text.split())
+        char_count = len(text)
+        sentence_count = text.count('.') + text.count('!') + text.count('?')
+        paragraph_count = max(1, sentence_count // self.sentence_per_paragraph)
+        return word_count, char_count, paragraph_count
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("TLintITE")
         self.load_keybinds()
-        self.editor = CustomTextEdit(lambda: self.plain_paste_checkbox.isChecked())
-        self.editor.setFont(QFont("Consolas", 14))
-        self.setCentralWidget(self.editor)
-        self.linter = EnglishLinter(self.editor.document())
+
+        self.tabs = QTabWidget()
+        self.tabs.setTabsClosable(True)
+        self.tabs.tabCloseRequested.connect(self.close_tab)
+        self.setCentralWidget(self.tabs)
+
+        self.placeholder_tab = None
+        self.show_placeholder_tab()
+
         self.outline_mode = "None"
-        self.editor.viewport().installEventFilter(self)
+        if isinstance(self.current_tab(), TextEditorTab):
+            editor = self.current_editor()
+            if editor:
+                editor.viewport().installEventFilter(self)
+
         self.init_menu()
-        self.sentence_per_paragraph = 3
+        self.current_tab().sentence_per_paragraph = 3
         self.setStatusBar(QStatusBar())
 
         self.instaplace_checkbox = QCheckBox("Instaplace")
@@ -285,8 +321,11 @@ class MainWindow(QMainWindow):
 
         self.suggestions_enabled = False
 
-        self.editor.textChanged.connect(self.update_counters)
-        self.editor.textChanged.connect(self.apply_instaplace_live)
+        editor = self.current_editor()
+        if editor:
+            editor.textChanged.connect(self.update_counters)
+            editor.textChanged.connect(self.apply_instaplace_live)
+
         self.update_counters()
 
         self.find_dock = FindReplaceDock(self)
@@ -325,6 +364,22 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.plain_paste_checkbox)
 
         self.current_file_path = None
+
+    def show_placeholder_tab(self):
+        if self.placeholder_tab is not None:
+            return
+
+        self.placeholder_tab = PlaceholderTab()
+        index = self.tabs.addTab(self.placeholder_tab, "Welcome")
+        self.tabs.setCurrentIndex(index)
+
+        self.tabs.tabBar().setTabButton(index, QTabBar.RightSide, None)
+
+    def remove_placeholder_tab(self):
+        index = self.tabs.indexOf(self.placeholder_tab)
+        if index != -1:
+            self.tabs.removeTab(index)
+        self.placeholder_tab = None
 
     def paste(self):
         if self.get_plain_paste_enabled and self.get_plain_paste_enabled():
@@ -463,7 +518,9 @@ class MainWindow(QMainWindow):
         toggle_suggestions_action.setObjectName("toggle_suggestions_action")
         toggle_suggestions_action.triggered.connect(self.toggle_suggestions)
         edit_menu.addAction(toggle_suggestions_action)
-        self.editor.addAction(toggle_suggestions_action)
+        editor = self.current_editor()
+        if editor:
+            editor.addAction(toggle_suggestions_action)
 
         reload_keybinds_action = QAction("Reload Keybindings", self)
         reload_keybinds_action.setObjectName("reload_keybinds_action")
@@ -527,20 +584,40 @@ class MainWindow(QMainWindow):
             self.find_dock.show()
             self.find_dock.find_input.setFocus()
 
+    def current_tab(self) -> TextEditorTab:
+        return self.tabs.currentWidget()
+
+    def current_editor(self) -> CustomTextEdit:
+        tab = self.current_tab()
+        return tab.editor if tab else None
+
+    def current_linter(self) -> EnglishLinter:
+        tab = self.current_tab()
+        return tab.linter if tab else None
+
+    def close_tab(self, index):
+        if self.tabs.widget(index) == self.placeholder_tab:
+            return
+        widget = self.tabs.widget(index)
+        self.tabs.removeTab(index)
+
+        if widget:
+            widget.deleteLater()
+
+        if self.tabs.count() == 0:
+            self.show_placeholder_tab()
+
     def save_raw_file(self):
         try:
-            if self.current_file_path:
-                with open(self.current_file_path, "w", encoding="utf-8") as file:
-                    file.write(self.editor.toPlainText())
+            tab = self.current_tab()
+            if tab and isinstance(tab, TextEditorTab) and tab.path:
+                with open(tab.path, "w", encoding="utf-8") as file:
+                    file.write(tab.editor.toPlainText())
             else:
-                path, _ = QFileDialog.getSaveFileName(self, "Save Raw", "", "Text Files (*.txt);;All Files (*)")
-                if path:
-                    with open(path, "w", encoding="utf-8") as file:
-                        file.write(self.editor.toPlainText())
-                    self.current_file_path = path
+                QMessageBox.information(self, "No path", "No file path is set for this tab.")
         except Exception as e:
             print(e)
-            QMessageBox.information(self, "Error:", e)
+            QMessageBox.information(self, "Error:", str(e))
 
     def load_keybinds(self, path=get_user_config_path("keybind.json")):
         default_binds = {
@@ -635,41 +712,33 @@ class MainWindow(QMainWindow):
         if dock.case_checkbox.isChecked():
             flags |= QTextDocument.FindCaseSensitively
 
-        cursor = self.editor.textCursor()
-        found = self.editor.document().find(text, cursor, flags)
+        cursor = self.current_editor().textCursor()
+        found = self.current_editor().document().find(text, cursor, flags)
         if found.isNull():
-            found = self.editor.document().find(text, QTextCursor(), flags)
+            found = self.current_editor().document().find(text, QTextCursor(), flags)
 
         if not found.isNull():
-            self.editor.setTextCursor(found)
-            self.editor.setFocus()
+            self.current_editor().setTextCursor(found)
+            self.current_editor().setFocus()
 
     def new_document(self):
-        self.editor.clear()
-        self.current_file_path = None
-        self.sentence_per_paragraph = 3
-        self.editor.setFont(QFont("Consolas", 14))
-
-        cursor = self.editor.textCursor()
-        cursor.beginEditBlock()
-        doc = self.editor.document()
-        block = doc.firstBlock()
-        while block.isValid():
-            cursor.setPosition(block.position())
-            cursor.select(QTextCursor.BlockUnderCursor)
-            block_format = cursor.blockFormat()
-            block_format.setLineHeight(100, QTextBlockFormat.ProportionalHeight)
-            cursor.setBlockFormat(block_format)
-            block = block.next()
-        cursor.endEditBlock()
-
+        tab = TextEditorTab(lambda: self.plain_paste_checkbox.isChecked())
+        index = self.tabs.addTab(tab, "Untitled")
+        self.tabs.setCurrentIndex(index)
         self.update_counters()
 
     def replace_text(self, dock):
-        cursor = self.editor.textCursor()
+        cursor = self.current_editor().textCursor()
         if cursor.hasSelection() and cursor.selectedText() == dock.find_input.text():
             cursor.insertText(dock.replace_input.text())
         self.find_text_docked(dock)
+
+    def current_tab(self):
+        return self.tabs.currentWidget()
+
+    def current_editor(self):
+        tab = self.current_tab()
+        return tab.editor if isinstance(tab, TextEditorTab) else None
 
     def load_instaplace_rules(self, path=get_user_config_path("instaplace.json")):
         try:
@@ -685,7 +754,7 @@ class MainWindow(QMainWindow):
         if not self.instaplace_enabled:
             return
 
-        cursor = self.editor.textCursor()
+        cursor = self.current_editor().textCursor()
         cursor.select(QTextCursor.WordUnderCursor)
         word = cursor.selectedText()
 
@@ -707,43 +776,50 @@ class MainWindow(QMainWindow):
             return
 
         flags = Qt.CaseSensitive if dock.case_checkbox.isChecked() else Qt.CaseInsensitive
-        content = self.editor.toPlainText()
+        content = self.current_editor().toPlainText()
         new_content = content.replace(text, replacement) if flags == Qt.CaseSensitive else re.sub(re.escape(text),
                                                                                                   replacement, content,
                                                                                                   flags=re.IGNORECASE)
-        self.editor.setPlainText(new_content)
+        self.current_editor().setPlainText(new_content)
 
     def set_outline(self, mode):
         self.outline_mode = mode
-        self.editor.viewport().update()
+        self.current_editor().viewport().update()
 
     def eventFilter(self, obj, event):
-        if obj == self.editor.viewport() and event.type() == event.Paint:
+        if obj == self.current_editor().viewport() and event.type() == event.Paint:
             result = super().eventFilter(obj, event)
             self.draw_outline()
             return result
         return super().eventFilter(obj, event)
 
     def update_counters(self):
-        text = self.editor.toPlainText()
+        editor = self.current_editor()
+        tab = self.current_tab()
+
+        if not editor or not isinstance(tab, TextEditorTab):
+            self.statusBar().showMessage("No document open")
+            return
+
+        text = editor.toPlainText()
         word_count = len(text.split())
         char_count = len(text)
         sentence_count = text.count('.') + text.count('!') + text.count('?')
         paragraph_count = max(1,
-                              sentence_count // self.sentence_per_paragraph) if self.sentence_per_paragraph > 0 else 1
+                              sentence_count // tab.sentence_per_paragraph) if tab.sentence_per_paragraph > 0 else 1
 
         self.statusBar().showMessage(
             f"Words: {word_count} | Characters: {char_count} | Paragraphs (est.): {paragraph_count}")
 
     def set_paragraph_settings(self):
         value, ok = QInputDialog.getInt(self, "Paragraph Settings", "How many sentences per paragraph?",
-                                        self.sentence_per_paragraph, 1, 20)
+                                        self.current_tab().sentence_per_paragraph, 1, 20)
         if ok:
-            self.sentence_per_paragraph = value
+            self.current_tab().sentence_per_paragraph = value
             self.update_counters()
 
     def draw_outline(self):
-        painter = QPainter(self.editor.viewport())
+        painter = QPainter(self.current_editor().viewport())
         pen = QPen(Qt.magenta, 2, Qt.DashLine)
         painter.setPen(pen)
 
@@ -759,25 +835,25 @@ class MainWindow(QMainWindow):
         width_px = int(width_in * dpi)
         height_px = int(height_in * dpi)
 
-        rect = QRect(0, 0, min(width_px, self.editor.viewport().width()),
-                     min(height_px, self.editor.viewport().height()))
+        rect = QRect(0, 0, min(width_px, self.current_editor().viewport().width()),
+                     min(height_px, self.current_editor().viewport().height()))
         painter.drawRect(rect)
 
     def change_font(self):
-        current_font = self.editor.font()
+        current_font = self.current_editor().font()
         font, ok = QFontDialog.getFont(current_font, self, "Select Font")
         if ok:
-            self.editor.setFont(font)
+            self.current_editor().setFont(font)
 
     def change_font_size(self):
-        current_font = self.editor.font()
+        current_font = self.current_editor().font()
         size, ok = QInputDialog.getInt(self, "Font Size", "Enter font size:", current_font.pointSize(), 6, 72)
         if ok:
             current_font.setPointSize(size)
-            self.editor.setFont(current_font)
+            self.current_editor().setFont(current_font)
 
     def change_line_spacing(self):
-        cursor = self.editor.textCursor()
+        cursor = self.current_editor().textCursor()
         block_format = cursor.blockFormat()
 
         spacing, ok = QInputDialog.getDouble(self, "Line Spacing",
@@ -789,9 +865,12 @@ class MainWindow(QMainWindow):
             cursor.setBlockFormat(block_format)
 
     def open_file_from_browser(self, index):
+        if hasattr(self, 'placeholder_tab') and self.placeholder_tab:
+            self.remove_placeholder_tab()
         try:
             path = self.file_model.filePath(index)
             if os.path.isfile(path):
+                ext = os.path.splitext(path)[1].lower()
                 allowed_exts = {
                     '.txt', '.tlxt', '.md', '.rst', '.adoc', '.asciidoc', '.asc',
                     '.py', '.pyw', '.pyc', '.pyi', '.pypp',
@@ -833,7 +912,6 @@ class MainWindow(QMainWindow):
                     '.tex',
                     '.awe', '.orcat', '.sorcat', '.vem'
                 }
-                ext = os.path.splitext(path)[1].lower()
                 if ext not in allowed_exts:
                     QMessageBox.warning(self, "Unsupported File", f"File type '{ext}' is not supported.")
                     return
@@ -845,7 +923,9 @@ class MainWindow(QMainWindow):
                     QMessageBox.warning(self, "Error", "Cannot open file: Not a valid UTF-8 text file.")
                     return
 
-                self.current_file_path = path
+                tab = TextEditorTab(lambda: self.plain_paste_checkbox.isChecked())
+                tab.path = path
+                tab_name = os.path.basename(path)
 
                 settings_match = re.search(
                     r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>",
@@ -856,26 +936,54 @@ class MainWindow(QMainWindow):
                     settings_str = settings_match.group(1)
                     content_start = settings_match.end()
                     content = full_text[content_start:].lstrip()
+                    tab.editor.setPlainText(content)
+                else:
+                    tab.editor.setPlainText(full_text)
 
-                    self.editor.setPlainText(content)
+                index = self.tabs.addTab(tab, tab_name)
+                self.tabs.setCurrentIndex(index)
+
+                if settings_match:
                     try:
                         settings = json.loads(settings_str)
-                        self._apply_settings(settings)
+                        font_family = settings.get("font_family", "Consolas")
+                        font_size = settings.get("font_size", 14)
+                        font = QFont(font_family, font_size)
+                        tab.editor.setFont(font)
+                        tab.sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
+
+                        spacing = settings.get("line_spacing", 1.0)
+                        cursor = tab.editor.textCursor()
+                        cursor.beginEditBlock()
+                        block = tab.editor.document().firstBlock()
+                        while block.isValid():
+                            cursor.setPosition(block.position())
+                            cursor.select(QTextCursor.BlockUnderCursor)
+                            fmt = cursor.blockFormat()
+                            fmt.setLineHeight(spacing * 100, QTextBlockFormat.ProportionalHeight)
+                            cursor.setBlockFormat(fmt)
+                            block = block.next()
+                        cursor.endEditBlock()
                     except Exception as e:
-                        print("Failed to parse settings:", e)
-                else:
-                    self.editor.setPlainText(full_text)
+                        print("Failed to apply settings:", e)
+
+                self.update_counters()
+
+
         except Exception as e:
             print(e)
             QMessageBox.information(self, "Error:", str(e))
 
     def open_file(self):
+        if hasattr(self, 'placeholder_tab') and self.placeholder_tab:
+            self.remove_placeholder_tab()
         try:
             path, _ = QFileDialog.getOpenFileName(
                 self, "Open File", "",
                 "Text Files (*.txt *.tlxt *.py *.md *.json *.csv *.java *.class *.rs *.cpp *.css *.js *.html *.c *.cs);;All Files (*)"
             )
             if path:
+                ext = os.path.splitext(path)[1].lower()
                 allowed_exts = {
                     '.txt', '.tlxt', '.md', '.rst', '.adoc', '.asciidoc', '.asc',
                     '.py', '.pyw', '.pyc', '.pyi', '.pypp',
@@ -918,7 +1026,6 @@ class MainWindow(QMainWindow):
                     '.awe', '.orcat', '.sorcat', '.vem'
                 }
 
-                ext = os.path.splitext(path)[1].lower()
                 if ext not in allowed_exts:
                     QMessageBox.warning(self, "Unsupported File", f"File type '{ext}' is not supported.")
                     return
@@ -932,6 +1039,10 @@ class MainWindow(QMainWindow):
 
                 self.current_file_path = path
 
+                tab = TextEditorTab(lambda: self.plain_paste_checkbox.isChecked())
+                tab.path = path
+                tab_name = os.path.basename(path)
+
                 settings_match = re.search(
                     r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>",
                     full_text, re.DOTALL
@@ -941,15 +1052,38 @@ class MainWindow(QMainWindow):
                     settings_str = settings_match.group(1)
                     content_start = settings_match.end()
                     content = full_text[content_start:].lstrip()
+                    tab.editor.setPlainText(content)
+                else:
+                    tab.editor.setPlainText(full_text)
 
-                    self.editor.setPlainText(content)
+                index = self.tabs.addTab(tab, tab_name)
+                self.tabs.setCurrentIndex(index)
+
+                if settings_match:
                     try:
                         settings = json.loads(settings_str)
-                        self._apply_settings(settings)
+                        font_family = settings.get("font_family", "Consolas")
+                        font_size = settings.get("font_size", 14)
+                        font = QFont(font_family, font_size)
+                        tab.editor.setFont(font)
+                        tab.sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
+
+                        spacing = settings.get("line_spacing", 1.0)
+                        cursor = tab.editor.textCursor()
+                        cursor.beginEditBlock()
+                        block = tab.editor.document().firstBlock()
+                        while block.isValid():
+                            cursor.setPosition(block.position())
+                            cursor.select(QTextCursor.BlockUnderCursor)
+                            fmt = cursor.blockFormat()
+                            fmt.setLineHeight(spacing * 100, QTextBlockFormat.ProportionalHeight)
+                            cursor.setBlockFormat(fmt)
+                            block = block.next()
+                        cursor.endEditBlock()
                     except Exception as e:
-                        print("Failed to parse settings:", e)
-                else:
-                    self.editor.setPlainText(full_text)
+                        print("Failed to apply settings:", e)
+
+                self.update_counters()
 
         except Exception as e:
             print(e)
@@ -957,12 +1091,14 @@ class MainWindow(QMainWindow):
 
     def save_file(self):
         try:
-            if self.current_file_path:
-                self._save_to_path(self.current_file_path)
+            tab = self.current_tab()
+            if tab and isinstance(tab, TextEditorTab) and tab.path:
+                self._save_to_path(tab.path)
             else:
-                self.save_as_file()
+                QMessageBox.information(self, "No path", "No file path is set for this tab.")
         except Exception as e:
             print(e)
+            QMessageBox.information(self, "Error:", str(e))
 
     def save_as_file(self):
         try:
@@ -979,13 +1115,13 @@ class MainWindow(QMainWindow):
     def _save_to_path(self, path):
         try:
             settings = {
-                "font_family": self.editor.font().family(),
-                "font_size": self.editor.font().pointSize(),
-                "sentence_per_paragraph": self.sentence_per_paragraph,
+                "font_family": self.current_editor().font().family(),
+                "font_size": self.current_editor().font().pointSize(),
+                "sentence_per_paragraph": self.current_tab().sentence_per_paragraph,
                 "line_spacing": self._get_line_spacing()
             }
 
-            content = self.editor.toPlainText()
+            content = self.current_editor().toPlainText()
             data = f"<__s-e-t-t-i-n-g-s__>\n{json.dumps(settings, indent=2)}\n</__s-e-t-t-i-n-g-s__>\n{content}"
 
             with open(path, "w", encoding="utf-8") as file:
@@ -999,15 +1135,15 @@ class MainWindow(QMainWindow):
             font_family = settings.get("font_family", "Consolas")
             font_size = settings.get("font_size", 14)
             font = QFont(font_family, font_size)
-            self.editor.setFont(font)
+            self.current_editor().setFont(font)
 
-            self.sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
+            self.current_tab().sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
 
             spacing = settings.get("line_spacing", 1.0)
-            cursor = self.editor.textCursor()
+            cursor = self.current_editor().textCursor()
             cursor.beginEditBlock()
 
-            doc = self.editor.document()
+            doc = self.current_editor().document()
             block = doc.firstBlock()
 
             while block.isValid():
@@ -1029,15 +1165,14 @@ class MainWindow(QMainWindow):
         return re.sub(r"<__s-e-t-t-i-n-g-s__>.*?</__s-e-t-t-i-n-g-s__>", "", text, flags=re.DOTALL)
 
     def _get_line_spacing(self):
-        cursor = self.editor.textCursor()
+        cursor = self.current_editor().textCursor()
         block_format = cursor.blockFormat()
         line_height = block_format.lineHeight()
         return (line_height / 100.0) if line_height > 0 else 1.0
 
     @pyqtSlot()
     def reload_rules(self):
-        self.linter.load_rules()
-
+        self.current_linter().load_rules()
 
 if __name__ == "__main__":
     setup_user_config()
