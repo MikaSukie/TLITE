@@ -37,12 +37,6 @@ def setup_user_config():
             if os.path.isfile(src):
                 shutil.copyfile(src, dst)
 
-
-def resource_path(relative_path):
-    import sys, os
-    base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
-    return os.path.join(base_path, relative_path)
-
 class PlaceholderTab(QWidget):
     def __init__(self):
         super().__init__()
@@ -286,6 +280,20 @@ class TextEditorTab(QWidget):
         paragraph_count = max(1, sentence_count // self.sentence_per_paragraph)
         return word_count, char_count, paragraph_count
 
+def load_supported_filetypes(path=get_user_config_path("filetypes.json")):
+    try:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    return set(data)
+                else:
+                    print("filetypes.json is not a list.")
+    except Exception as e:
+        print("Failed to load supported filetypes:", e)
+
+    return {'.txt', '.tlxt'}
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -364,6 +372,8 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.plain_paste_checkbox)
 
         self.current_file_path = None
+
+        self.supported_filetypes = load_supported_filetypes()
 
     def show_placeholder_tab(self):
         if self.placeholder_tab is not None:
@@ -871,48 +881,7 @@ class MainWindow(QMainWindow):
             path = self.file_model.filePath(index)
             if os.path.isfile(path):
                 ext = os.path.splitext(path)[1].lower()
-                allowed_exts = {
-                    '.txt', '.tlxt', '.md', '.rst', '.adoc', '.asciidoc', '.asc',
-                    '.py', '.pyw', '.pyc', '.pyi', '.pypp',
-                    '.java', '.class',
-                    '.rs',
-                    '.cpp', '.cxx', '.cc', '.c', '.h', '.hpp', '.hh', '.hxx',
-                    '.cs',
-                    '.js', '.jsx', '.ts', '.tsx',
-                    '.html', '.htm', '.xhtml',
-                    '.css', '.scss', '.sass', '.less',
-                    '.json', '.json5', '.geojson',
-                    '.csv',
-                    '.xml',
-                    '.yml', '.yaml',
-                    '.toml',
-                    '.ini', '.conf', '.cfg',
-                    '.sh', '.bash', '.zsh', '.fish', '.csh', '.tcsh',
-                    '.bat', '.cmd',
-                    '.ps1',
-                    '.php', '.php3', '.php4', '.php5', '.phtml',
-                    '.pl', '.pm',
-                    '.rb', '.rake',
-                    '.swift',
-                    '.kt', '.kts',
-                    '.scala',
-                    '.groovy',
-                    '.hs',
-                    '.lua',
-                    '.m',
-                    '.vb',
-                    '.sql',
-                    '.gradle',
-                    '.makefile', '.mk',
-                    '.dockerfile',
-                    '.gitignore',
-                    '.log',
-                    '.diff', '.patch',
-                    '.vim', '.vimrc',
-                    '.tex',
-                    '.awe', '.orcat', '.sorcat', '.vem'
-                }
-                if ext not in allowed_exts:
+                if ext not in self.supported_filetypes:
                     QMessageBox.warning(self, "Unsupported File", f"File type '{ext}' is not supported.")
                     return
 
@@ -984,49 +953,7 @@ class MainWindow(QMainWindow):
             )
             if path:
                 ext = os.path.splitext(path)[1].lower()
-                allowed_exts = {
-                    '.txt', '.tlxt', '.md', '.rst', '.adoc', '.asciidoc', '.asc',
-                    '.py', '.pyw', '.pyc', '.pyi', '.pypp',
-                    '.java', '.class',
-                    '.rs',
-                    '.cpp', '.cxx', '.cc', '.c', '.h', '.hpp', '.hh', '.hxx',
-                    '.cs',
-                    '.js', '.jsx', '.ts', '.tsx',
-                    '.html', '.htm', '.xhtml',
-                    '.css', '.scss', '.sass', '.less',
-                    '.json', '.json5', '.geojson',
-                    '.csv',
-                    '.xml',
-                    '.yml', '.yaml',
-                    '.toml',
-                    '.ini', '.conf', '.cfg',
-                    '.sh', '.bash', '.zsh', '.fish', '.csh', '.tcsh',
-                    '.bat', '.cmd',
-                    '.ps1',
-                    '.php', '.php3', '.php4', '.php5', '.phtml',
-                    '.pl', '.pm',
-                    '.rb', '.rake',
-                    '.swift',
-                    '.kt', '.kts',
-                    '.scala',
-                    '.groovy',
-                    '.hs',
-                    '.lua',
-                    '.m',
-                    '.vb',
-                    '.sql',
-                    '.gradle',
-                    '.makefile', '.mk',
-                    '.dockerfile',
-                    '.gitignore',
-                    '.log',
-                    '.diff', '.patch',
-                    '.vim', '.vimrc',
-                    '.tex',
-                    '.awe', '.orcat', '.sorcat', '.vem'
-                }
-
-                if ext not in allowed_exts:
+                if ext not in self.supported_filetypes:
                     QMessageBox.warning(self, "Unsupported File", f"File type '{ext}' is not supported.")
                     return
 
