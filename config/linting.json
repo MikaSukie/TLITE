@@ -404,7 +404,23 @@
 		"color": "palegreen"
 	},
 	{
+		"word": "cin",
+		"color": "palegreen"
+	},
+	{
+		"word": "read",
+		"color": "palegreen"
+	},
+	{
 		"word": "out",
+		"color": "tomato"
+	},
+	{
+		"word": "write",
+		"color": "tomato"
+	},
+	{
+		"word": "cout",
 		"color": "tomato"
 	},
 	{
@@ -1473,7 +1489,7 @@
 	},
 	{
 		"word": "very",
-		"color": "purple"
+		"color": "darkorchid"
 	},
 	{
 		"word": "decision",
@@ -1490,5 +1506,25 @@
 	{
 		"word": "facebook",
 		"color": "skyblue"
+	},
+	{
+		"word": "assign",
+		"color": "violet"
+	},
+	{
+		"word": "assignment",
+		"color": "mediumpurple"
+	},
+	{
+		"word": "total",
+		"color": "aqua"
+	},
+	{
+		"word": "instruction",
+		"color": "slateblue"
+	},
+	{
+		"word": "instructions",
+		"color": "slateblue"
 	}
 ]
