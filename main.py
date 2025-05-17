@@ -1152,6 +1152,7 @@ class MainWindow(QMainWindow):
 	@pyqtSlot()
 	def reload_rules(self):
 		self.current_linter().load_rules()
+		self.supported_filetypes = load_supported_filetypes()
 
 if __name__ == "__main__":
 	setup_user_config()
