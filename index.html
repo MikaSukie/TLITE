@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="darkorchid" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>TLITE Editor - Smart Lightweight IDE</title>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #05000d, #0d0015);
+            background-attachment: fixed;
+            background-size: cover;
+            color: #ffffff;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 50px 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1.5s forwards;
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff1493;
+            animation: glowPulse 2s infinite alternate;
+            transition: transform 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        h1:hover {
+            transform: scale(1.08);
+            text-shadow:
+                0 0 15px #ff00ff,
+                0 0 30px #ff00ff,
+                0 0 50px #ff1493,
+                0 0 70px #ff69b4;
+        }
+        h1 img {
+            height: 50px;
+            width: 50px;
+            vertical-align: middle;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(45deg, #ff00ff, #ff1493);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+        }
+        .button:hover {
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.8);
+        }
+        .credits {
+            margin-top: 50px;
+            font-size: 1rem;
+            color: #bbbbbb;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        .image-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            perspective: 1000px;
+        }
+        .tilt-image {
+            width: 90%;
+            max-width: 900px;
+            height: auto;
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes glowPulse {
+            0% {
+                text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff1493, 0 0 20px #ff1493;
+            }
+            100% {
+                text-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff, 0 0 45px #ff1493;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <img src="TLITE.png" alt="TLITE Icon">
+            TLITE Editor
+        </h1>
+        <p>A smart, lightweight IDE with the following:</p>
+        <p>✔ Text typing macros &nbsp; ✔ Keyword linting &nbsp; ✔ Suggestions<br>✔ Built-in terminal &nbsp; ✔ File explorer &nbsp; ✔ Customizable</p>
+        <button class="button" id="tiltButton" onclick="learnMore()">Project Page</button>
+        <p class="credits">Created by MikaSukie / Lorielle</p>
+
+        <div class="image-container">
+            <img src="TLITE-Editor.png" alt="TLITE Screenshot" class="tilt-image" id="tiltImage">
+        </div>
+    </div>
+
+    <script>
+        function learnMore() {
+            window.location.href = "https://github.com/MikaSukie/TLITE";
+        }
+
+        function addStrongerTiltEffect(element, intensity = 15) {
+            element.addEventListener("mousemove", (event) => {
+                const rect = element.getBoundingClientRect();
+                const x = (event.clientX - rect.left) / rect.width - 0.5;
+                const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+                element.style.transform = `rotateY(${x * intensity}deg) rotateX(${y * -intensity}deg) scale(1.05)`;
+                element.style.boxShadow = `0px 0px ${Math.abs(x) * 30 + Math.abs(y) * 30}px rgba(255, 0, 255, 0.8)`;
+            });
+
+            element.addEventListener("mouseleave", () => {
+                element.style.transform = "rotateY(0deg) rotateX(0deg) scale(1)";
+                element.style.boxShadow = "none";
+            });
+        }
+
+        const tiltButton = document.getElementById("tiltButton");
+        const tiltImage = document.getElementById("tiltImage");
+
+        addStrongerTiltEffect(tiltButton, 20);
+        addStrongerTiltEffect(tiltImage, 12);
+    </script>
+</body>
+</html>
