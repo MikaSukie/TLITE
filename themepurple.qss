@@ -1,0 +1,217 @@
+/* === PINK / PURPLE / SKY BLUE THEME === */
+
+QMainWindow {
+    background-color: #1E1030; /* deep purple background */
+}
+
+/* === TEXT AREAS === */
+QTextEdit {
+    background-color: #24133A;
+    color: #E6C9FF; /* soft lilac text */
+    font-family: Consolas, Courier, monospace;
+    font-size: 14pt;
+    border: none;
+    selection-background-color: #6A3FA0;
+    padding: 10px;
+    border-radius: 8px;
+    outline: none;
+}
+
+QPlainTextEdit {
+    background-color: #24133A;
+    color: #E6C9FF;
+    font-family: Consolas, Courier, monospace;
+    font-size: 12pt;
+    border: 1px solid #6A3FA0;
+    padding: 10px;
+}
+
+/* === INPUTS === */
+QLineEdit, QComboBox {
+    background-color: #2A1648;
+    color: #E6C9FF;
+    border: 1px solid #764D9F;
+    padding: 6px;
+    border-radius: 6px;
+    font-size: 13pt;
+}
+
+/* === SCROLLBARS === */
+QScrollBar:vertical, QScrollBar:horizontal {
+    background: #1B0E2E;
+    border: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+    background: #8A68D0;
+    border-radius: 6px;
+    min-height: 20px;
+    min-width: 20px;
+}
+
+QScrollBar::handle:hover {
+    background: #B08CF8;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    background: none;
+    border: none;
+    height: 0px;
+    width: 0px;
+}
+
+/* === MENUBAR === */
+QMenuBar {
+    background-color: #1B0E2E;
+    color: #E6C9FF;
+    font-weight: bold;
+}
+
+QMenuBar::item {
+    padding: 6px 14px;
+    background-color: transparent;
+}
+
+QMenuBar::item:selected {
+    background-color: #6A3FA0;
+    border-radius: 4px;
+}
+
+/* === MENUS === */
+QMenu {
+    background-color: #1B0E2E;
+    color: #E6C9FF;
+    border: 1px solid #6A3FA0;
+    padding: 6px;
+}
+
+QMenu::item {
+    padding: 8px 20px;
+    border-radius: 4px;
+}
+
+QMenu::item:selected {
+    background-color: #6EE2FF; /* sky blue accent */
+    color: #1E1030;
+}
+
+/* === STATUS BAR === */
+QStatusBar {
+    color: #E6C9FF;
+    background-color: #1B0E2E;
+    padding: 4px 8px;
+    border-top: 1px solid #6A3FA0;
+}
+
+/* === CHECKBOX === */
+QCheckBox {
+    color: #E6C9FF;
+    padding: 4px;
+    spacing: 6px;
+}
+
+/* === LIST / TREE === */
+QListView, QTreeView {
+    background-color: #1B0E2E;
+    color: #E6C9FF;
+    border: 1px solid #6A3FA0;
+    padding: 6px;
+    font-family: Consolas, Courier, monospace;
+    font-size: 12pt;
+    selection-background-color: #FF77C8; /* bright pink */
+    selection-color: #1E1030;
+    outline: none;
+}
+
+QTreeView {
+    alternate-background-color: #24133A;
+    font-size: 13pt;
+}
+
+QTreeView::item {
+    padding: 4px 8px;
+    margin: 2px 0;
+}
+
+QTreeView::item:selected {
+    background-color: #FF77C8;
+    color: #1E1030;
+    border-radius: 4px;
+}
+
+/* === DIALOGS === */
+QDialog, QMessageBox, QInputDialog {
+    background-color: #1B0E2E;
+    color: #E6C9FF;
+    border: 1px solid #6A3FA0;
+}
+
+QDialog QLabel, QMessageBox QLabel, QInputDialog QLabel {
+    color: #E6C9FF;
+    font-size: 12pt;
+}
+
+QDialog QPushButton, QMessageBox QPushButton, QInputDialog QPushButton {
+    background-color: #6A3FA0;
+    color: #FFFFFF;
+    border: 1px solid #8A68D0;
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+
+QDialog QPushButton:hover, QMessageBox QPushButton:hover, QInputDialog QPushButton:hover {
+    background-color: #FF77C8;
+    border: 1px solid #FF77C8;
+    color: #1E1030;
+}
+
+/* === DOCK WIDGET === */
+QDockWidget {
+    background-color: #6A3FA0;
+    border: 1px solid #6A3FA0;
+}
+
+QDockWidget::title {
+    background-color: #6A3FA0;
+    padding-left: 8px;
+    padding-right: 8px;
+    height: 28px;
+    font-weight: bold;
+    text-align: left;
+    qproperty-alignment: AlignLeft | AlignVCenter;
+}
+
+QDockWidget QLabel {
+    color: white;
+}
+
+QDockWidget QAbstractButton {
+    background-color: #6A3FA0;
+    color: white;
+    border: none;
+    border-radius: 2px;
+    padding: 2px;
+    width: 16px;
+    height: 16px;
+}
+
+QDockWidget QAbstractButton:hover {
+    background-color: #FF77C8;
+    color: #1E1030;
+}
+
+/* === PUSH BUTTONS === */
+QPushButton {
+    background-color: #FF77C8; /* pink main button */
+    color: #1E1030;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+QPushButton:hover {
+    background-color: #6EE2FF; /* sky blue hover */
+}
