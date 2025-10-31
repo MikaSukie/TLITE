@@ -1,1 +1,3 @@
 pyinstaller --noconfirm --onefile --noconsole --windowed --icon=myicon.ico --add-data "config;config" --name=TLintITE main.py
+
+python -m nuitka main.py --onefile --standalone --windows-disable-console --windows-icon-from-ico=myicon.ico --output-filename=TLintITE.exe --include-data-dir=config=config --enable-plugin=pyqt5
