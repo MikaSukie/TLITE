@@ -1,61 +1,249 @@
-/* === PINK / PURPLE / SKY BLUE THEME === */
+/* TLintITE — Pink / Purple / Sky Blue theme
+   Save as UTF-8 without BOM
+*/
 
+/* --- General --- */
+QWidget {
+    background-color: #1E1030; /* main app background */
+    color: #EDE4FF;            /* default text (light) */
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+/* --- Main window & central widgets --- */
 QMainWindow {
-    background-color: #1E1030; /* deep purple background */
+    background-color: #1E1030;
 }
 
-/* === TEXT AREAS === */
-QTextEdit {
-    background-color: #24133A;
-    color: #E6C9FF; /* soft lilac text */
-    font-family: Consolas, Courier, monospace;
-    font-size: 14pt;
-    border: none;
+/* --- TextAreas (QTextEdit / QPlainTextEdit) --- */
+QTextEdit, QPlainTextEdit {
+    background-color: #24133A;      /* darker card */
+    color: #EDE4FF;                 /* readable text */
+    border: 1px solid #4F2A66;
+    font-family: "Consolas", monospace;
+    font-size: 13pt;
+    padding: 8px;
+    border-radius: 6px;
     selection-background-color: #6A3FA0;
-    padding: 10px;
-    border-radius: 8px;
-    outline: none;
+    selection-color: #FFFDEB;
 }
 
+/* Slightly smaller body text for plain text (console etc.) */
 QPlainTextEdit {
-    background-color: #24133A;
-    color: #E6C9FF;
-    font-family: Consolas, Courier, monospace;
     font-size: 12pt;
-    border: 1px solid #6A3FA0;
-    padding: 10px;
 }
 
-/* === INPUTS === */
+/* --- Line edits and combo boxes --- */
 QLineEdit, QComboBox {
     background-color: #2A1648;
-    color: #E6C9FF;
-    border: 1px solid #764D9F;
+    color: #F6EFFF;
+    border: 1px solid #6A3FA0;
     padding: 6px;
     border-radius: 6px;
-    font-size: 13pt;
+    font-size: 12.5pt;
 }
 
-/* === SCROLLBARS === */
+/* Disabled text fields */
+QLineEdit:disabled, QComboBox:disabled {
+    color: #8E7AA8;
+    background-color: #24133A;
+}
+
+/* --- Buttons --- */
+QPushButton {
+    background-color: #FF77C8;
+    color: #1E1030;
+    border: 1px solid #D46FAF;
+    padding: 6px 12px;
+    border-radius: 6px;
+    min-height: 26px;
+}
+QPushButton:hover {
+    background-color: #6EE2FF;
+    color: #1E1030;
+}
+QPushButton:pressed {
+    background-color: #A356B8;
+    color: #FFF;
+}
+
+/* --- Menu bar & menus --- */
+QMenuBar {
+    background-color: #1B0E2E;
+    color: #EDE4FF;
+    font-weight: 600;
+}
+QMenuBar::item {
+    padding: 6px 12px;
+}
+QMenuBar::item:selected {
+    background-color: #6A3FA0;
+    color: #FFF;
+}
+QMenu {
+    background-color: #1B0E2E;
+    color: #EDE4FF;
+    border: 1px solid #6A3FA0;
+}
+QMenu::item {
+    padding: 6px 10px;
+}
+QMenu::item:selected {
+    background-color: #6EE2FF;
+    color: #1E1030;
+}
+
+/* --- Toolbars --- */
+QToolBar {
+    background-color: #2A1648;
+    border: 1px solid #4F2A66;
+    spacing: 4px;
+}
+QToolButton {
+    background: transparent;
+    color: #EDE4FF;
+    border: none;
+    padding: 6px;
+    margin: 2px;
+}
+QToolButton:hover {
+    background-color: rgba(110,226,255,0.12);
+    border-radius: 4px;
+}
+
+/* --- Status bar --- */
+QStatusBar {
+    background-color: #1B0E2E;
+    color: #EDE4FF;
+    border-top: 1px solid #6A3FA0;
+}
+
+/* --- Checkboxes / radio (labels) --- */
+QCheckBox, QRadioButton {
+    color: #EDE4FF;
+}
+
+/* --- Tree / file list --- */
+QTreeView, QListView {
+    background-color: #1B0E2E;
+    color: #EDE4FF;
+    border: 1px solid #4F2A66;
+    padding: 6px;
+    font-size: 12pt;
+    selection-background-color: #FF77C8;
+    selection-color: #1E1030;
+}
+QTreeView::item {
+    padding: 4px 8px;
+}
+QTreeView::item:selected {
+    background-color: #FF77C8;
+    color: #1E1030;
+}
+
+/* --- File explorer header / name bar (fix white-on-white) --- */
+QHeaderView::section {
+    background-color: #2A1648; /* matches dock/title */
+    color: #EDE4FF;
+    padding: 6px 8px;
+    border: 1px solid #4F2A66;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    font-weight: 600;
+}
+
+/* If you use QTreeView::header, keep parity */
+QTreeView::header {
+    background-color: #2A1648;
+    color: #EDE4FF;
+}
+
+/* --- Dialogs / message boxes --- */
+QDialog, QMessageBox, QInputDialog {
+    background-color: #24133A;
+    color: #EDE4FF;
+    border: 1px solid #6A3FA0;
+}
+QDialog QPushButton, QMessageBox QPushButton, QInputDialog QPushButton {
+    background-color: #6A3FA0;
+    color: #FFF;
+    border: 1px solid #8A68D0;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+QDialog QPushButton:hover, QMessageBox QPushButton:hover {
+    background-color: #FF77C8;
+    color: #1E1030;
+}
+
+/* --- Dock widgets (subtle, not bright so text remains legible) --- */
+QDockWidget {
+    background-color: #24133A;
+    border: 1px solid #4F2A66;
+}
+QDockWidget::title {
+    background-color: #2A1648;
+    color: #EDE4FF;
+    padding: 4px 8px;
+    height: 28px;
+    font-weight: 600;
+}
+
+/* --- Tabs: fixes title/tab strip & avoids white-on-white issues --- */
+QTabWidget::pane {
+    border: 1px solid #4F2A66;
+    background: #24133A;
+    padding: 4px;
+    border-radius: 4px;
+}
+QTabBar::tab {
+    background: #2A1648;
+    color: #EDE4FF;
+    padding: 6px 12px;
+    margin: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+QTabBar::tab:selected {
+    background: #6A3FA0;
+    color: #FFFFFF;
+}
+QTabBar::tab:hover {
+    background: #6EE2FF;
+    color: #1E1030;
+}
+
+/* --- Scrollbars: track / background (non-slider) fixed to darker card color --- */
 QScrollBar:vertical, QScrollBar:horizontal {
-    background: #1B0E2E;
+    background: #24133A; /* track / background behind the handle */
     border: none;
     width: 12px;
     height: 12px;
     border-radius: 6px;
 }
 
+/* The groove can be used in some Qt styles */
+QScrollBar::groove:vertical, QScrollBar::groove:horizontal {
+    background: #24133A;
+    border-radius: 6px;
+}
+
+/* remaining page areas (add/sub page) */
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: #24133A;
+    border-radius: 6px;
+}
+
+/* thumb/handle remains the accent color previously used */
 QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
     background: #8A68D0;
     border-radius: 6px;
     min-height: 20px;
-    min-width: 20px;
 }
-
 QScrollBar::handle:hover {
     background: #B08CF8;
 }
 
+/* remove arrow lines */
 QScrollBar::add-line, QScrollBar::sub-line {
     background: none;
     border: none;
@@ -63,155 +251,40 @@ QScrollBar::add-line, QScrollBar::sub-line {
     width: 0px;
 }
 
-/* === MENUBAR === */
-QMenuBar {
-    background-color: #1B0E2E;
-    color: #E6C9FF;
-    font-weight: bold;
-}
-
-QMenuBar::item {
-    padding: 6px 14px;
-    background-color: transparent;
-}
-
-QMenuBar::item:selected {
-    background-color: #6A3FA0;
-    border-radius: 4px;
-}
-
-/* === MENUS === */
-QMenu {
-    background-color: #1B0E2E;
-    color: #E6C9FF;
-    border: 1px solid #6A3FA0;
-    padding: 6px;
-}
-
-QMenu::item {
-    padding: 8px 20px;
-    border-radius: 4px;
-}
-
-QMenu::item:selected {
-    background-color: #6EE2FF; /* sky blue accent */
-    color: #1E1030;
-}
-
-/* === STATUS BAR === */
-QStatusBar {
-    color: #E6C9FF;
-    background-color: #1B0E2E;
-    padding: 4px 8px;
-    border-top: 1px solid #6A3FA0;
-}
-
-/* === CHECKBOX === */
-QCheckBox {
-    color: #E6C9FF;
-    padding: 4px;
-    spacing: 6px;
-}
-
-/* === LIST / TREE === */
-QListView, QTreeView {
-    background-color: #1B0E2E;
-    color: #E6C9FF;
-    border: 1px solid #6A3FA0;
-    padding: 6px;
-    font-family: Consolas, Courier, monospace;
-    font-size: 12pt;
-    selection-background-color: #FF77C8; /* bright pink */
-    selection-color: #1E1030;
-    outline: none;
-}
-
-QTreeView {
-    alternate-background-color: #24133A;
-    font-size: 13pt;
-}
-
-QTreeView::item {
-    padding: 4px 8px;
-    margin: 2px 0;
-}
-
-QTreeView::item:selected {
-    background-color: #FF77C8;
-    color: #1E1030;
-    border-radius: 4px;
-}
-
-/* === DIALOGS === */
-QDialog, QMessageBox, QInputDialog {
-    background-color: #1B0E2E;
-    color: #E6C9FF;
-    border: 1px solid #6A3FA0;
-}
-
-QDialog QLabel, QMessageBox QLabel, QInputDialog QLabel {
-    color: #E6C9FF;
+/* --- Terminal / console text specifics --- */
+QPlainTextEdit#terminal_output, QPlainTextEdit#console {
+    background-color: #0F0B15;
+    color: #EDE4FF;
+    border: 1px solid #3C2748;
+    font-family: "Consolas", monospace;
     font-size: 12pt;
 }
 
-QDialog QPushButton, QMessageBox QPushButton, QInputDialog QPushButton {
-    background-color: #6A3FA0;
-    color: #FFFFFF;
-    border: 1px solid #8A68D0;
-    padding: 6px 12px;
-    border-radius: 4px;
-}
-
-QDialog QPushButton:hover, QMessageBox QPushButton:hover, QInputDialog QPushButton:hover {
-    background-color: #FF77C8;
-    border: 1px solid #FF77C8;
-    color: #1E1030;
-}
-
-/* === DOCK WIDGET === */
-QDockWidget {
-    background-color: #6A3FA0;
-    border: 1px solid #6A3FA0;
-}
-
-QDockWidget::title {
-    background-color: #6A3FA0;
-    padding-left: 8px;
-    padding-right: 8px;
-    height: 28px;
-    font-weight: bold;
-    text-align: left;
-    qproperty-alignment: AlignLeft | AlignVCenter;
-}
-
-QDockWidget QLabel {
-    color: white;
-}
-
-QDockWidget QAbstractButton {
-    background-color: #6A3FA0;
-    color: white;
-    border: none;
-    border-radius: 2px;
-    padding: 2px;
-    width: 16px;
-    height: 16px;
-}
-
-QDockWidget QAbstractButton:hover {
-    background-color: #FF77C8;
-    color: #1E1030;
-}
-
-/* === PUSH BUTTONS === */
-QPushButton {
-    background-color: #FF77C8; /* pink main button */
-    color: #1E1030;
-    border: none;
-    padding: 6px 12px;
+/* --- Group boxes / frames --- */
+QGroupBox {
+    background: transparent;
+    color: #EDE4FF;
+    border: 1px solid #3C2748;
+    margin-top: 6px;
+    padding: 6px;
     border-radius: 6px;
 }
-
-QPushButton:hover {
-    background-color: #6EE2FF; /* sky blue hover */
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 2px 6px;
+    color: #EDE4FF;
 }
+
+/* Ensure focus outlines remain visible */
+*:focus {
+    outline: 1px solid rgba(110,226,255,0.25);
+}
+
+/* Helpful: explicit disabled text color for clarity */
+QWidget:disabled {
+    color: #8E7AA8;
+    background-color: #24133A;
+}
+
+/* End of theme */
