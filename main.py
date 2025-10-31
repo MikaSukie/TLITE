@@ -457,29 +457,49 @@ class CustomTextEdit(QPlainTextEdit):
 		fmt_unmatched = QTextCharFormat()
 		fmt_unmatched.setBackground(QColor(220, 80, 80, 200))
 
+		ExtraSelClass = None
+		try:
+			ExtraSelClass = QPlainTextEdit.ExtraSelection
+		except Exception:
+			try:
+				ExtraSelClass = QTextEdit.ExtraSelection
+			except Exception:
+				ExtraSelClass = None
+
+		def make_selection_at(pos, fmt):
+			try:
+				if ExtraSelClass:
+					sel = ExtraSelClass()
+				else:
+					sel = type("ExtraSelectionLike", (), {})()
+				cursor = self.textCursor()
+				cursor.setPosition(pos)
+				cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, 1)
+				sel.cursor = cursor
+				sel.format = fmt
+				return sel
+			except Exception as e:
+				print("make_selection_at error:", e)
+				return None
+
 		if self.match_info:
 			mi = self.match_info
 			if mi.get('pos1') is not None:
 				if mi['matched'] and mi.get('pos2') is not None:
 					for p in (mi['pos1'], mi['pos2']):
-						sel = QPlainTextEdit.ExtraSelection()
-						cursor = self.textCursor()
-						cursor.setPosition(p)
-						cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, 1)
-						sel.cursor = cursor
-						sel.format = fmt_matched
-						extra.append(sel)
+						sel = make_selection_at(p, fmt_matched)
+						if sel:
+							extra.append(sel)
 				else:
 					present_pos = mi['pos1'] if mi['pos1'] is not None else mi['pos2']
-					sel = QPlainTextEdit.ExtraSelection()
-					cursor = self.textCursor()
-					cursor.setPosition(present_pos)
-					cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, 1)
-					sel.cursor = cursor
-					sel.format = fmt_unmatched
-					extra.append(sel)
+					sel = make_selection_at(present_pos, fmt_unmatched)
+					if sel:
+						extra.append(sel)
 
-		self.setExtraSelections(extra)
+		try:
+			self.setExtraSelections(extra)
+		except Exception as e:
+			print("Could not apply extra selections:", e)
 
 class TextEditorTab(QWidget):
 	def __init__(self, get_plain_paste_callback, suggestions_enabled=True, instaplace_rules=None):
@@ -504,18 +524,31 @@ class TextEditorTab(QWidget):
 		return word_count, char_count, paragraph_count
 
 def load_supported_filetypes(path=get_user_config_path("filetypes.json")):
-	try:
-		if os.path.exists(path):
-			with open(path, "r", encoding="utf-8") as f:
-				data = json.load(f)
-				if isinstance(data, list):
-					return set(data)
-				else:
-					print("filetypes.json is not a list.")
-	except Exception as e:
-		print("Failed to load supported filetypes:", e)
+    try:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    normalized = set()
+                    for item in data:
+                        if not isinstance(item, str):
+                            continue
+                        it = item.strip()
+                        if not it:
+                            continue
+                        if not it.startswith("."):
+                            it = "." + it
+                        normalized.add(it.lower())
+                    if normalized:
+                        return normalized
+                    else:
+                        print("filetypes.json contained no usable entries, using defaults.")
+                else:
+                    print("filetypes.json is not a list, using defaults.")
+    except Exception as e:
+        print("Failed to load supported filetypes:", e)
 
-	return {'.txt', '.tlxt'}
+    return {'.txt', '.tlxt', '.py', '.md', '.json', '.csv', '.js', '.html', '.css'}
 
 class DiscordRPCManager:
 	def __init__(self, client_id, app_name="TLINT Editor"):
@@ -801,9 +834,12 @@ class MainWindow(QMainWindow):
 		self.discord_rpc.update(filename)
 
 	def _wire_up_editor(self, editor: CustomTextEdit):
-		editor.textChanged.connect(self.update_counters)
-		editor.textChanged.connect(self.apply_instaplace_live)
-		editor.viewport().installEventFilter(self)
+		try:
+			editor.textChanged.connect(self.update_counters)
+			editor.textChanged.connect(self.apply_instaplace_live)
+			editor.viewport().installEventFilter(self)
+		except Exception as e:
+			print("Error wiring up editor:", e)
 
 	def show_placeholder_tab(self):
 		if self.placeholder_tab is not None:
@@ -822,13 +858,11 @@ class MainWindow(QMainWindow):
 		self.placeholder_tab = None
 
 	def paste(self):
-		if self.get_plain_paste_enabled and self.get_plain_paste_enabled():
-			clipboard = QApplication.clipboard()
-			text = clipboard.text()
-
-			self.insertPlainText(text)
+		editor = self.current_editor()
+		if editor:
+			editor.paste()
 		else:
-			super().paste()
+			return
 
 	def toggle_suggestions_checkbox(self, state):
 		self.suggestions_enabled = state == Qt.Checked
@@ -1153,16 +1187,16 @@ class MainWindow(QMainWindow):
 			self.find_dock.show()
 			self.find_dock.find_input.setFocus()
 
-	def current_tab(self) -> TextEditorTab:
+	def current_tab(self):
 		return self.tabs.currentWidget()
 
-	def current_editor(self) -> CustomTextEdit:
+	def current_editor(self):
 		tab = self.current_tab()
 		return tab.editor if isinstance(tab, TextEditorTab) else None
 
-	def current_linter(self) -> EnglishLinter:
+	def current_linter(self):
 		tab = self.current_tab()
-		return tab.linter if tab else None
+		return tab.linter if isinstance(tab, TextEditorTab) else None
 
 	def close_tab(self, index):
 		if self.tabs.widget(index) == self.placeholder_tab:
@@ -1328,7 +1362,10 @@ class MainWindow(QMainWindow):
 		self._update_discord_rpc()
 
 	def replace_text(self, dock):
-		cursor = self.current_editor().textCursor()
+		editor = self.current_editor()
+		if not editor:
+			return
+		cursor = editor.textCursor()
 		if cursor.hasSelection() and cursor.selectedText() == dock.find_input.text():
 			cursor.insertText(dock.replace_input.text())
 		self.find_text_docked(dock)
@@ -1376,12 +1413,16 @@ class MainWindow(QMainWindow):
 		if not text:
 			return
 
+		editor = self.current_editor()
+		if not editor:
+			return
+
 		flags = Qt.CaseSensitive if dock.case_checkbox.isChecked() else Qt.CaseInsensitive
-		content = self.current_editor().toPlainText()
+		content = editor.toPlainText()
 		new_content = content.replace(text, replacement) if flags == Qt.CaseSensitive else re.sub(re.escape(text),
 																								  replacement, content,
 																								  flags=re.IGNORECASE)
-		self.current_editor().setPlainText(new_content)
+		editor.setPlainText(new_content)
 
 	def eventFilter(self, obj, event):
 		if obj == getattr(self.current_editor(), 'viewport', lambda: None)() and event.type() == QEvent.Paint:
@@ -1409,10 +1450,14 @@ class MainWindow(QMainWindow):
 			f"Words: {word_count} | Characters: {char_count} | Paragraphs (est.): {paragraph_count}")
 
 	def set_paragraph_settings(self):
+		tab = self.current_tab()
+		if not isinstance(tab, TextEditorTab):
+			QMessageBox.information(self, "No document", "No document is open.")
+			return
 		value, ok = QInputDialog.getInt(self, "Paragraph Settings", "How many sentences per paragraph?",
-										self.current_tab().sentence_per_paragraph, 1, 20)
+										tab.sentence_per_paragraph, 1, 20)
 		if ok:
-			self.current_tab().sentence_per_paragraph = value
+			tab.sentence_per_paragraph = value
 			self.update_counters()
 
 	def draw_bracket_guides(self):
@@ -1444,29 +1489,52 @@ class MainWindow(QMainWindow):
 			pass
 
 	def change_font(self):
-		current_font = self.current_editor().font()
+		editor = self.current_editor()
+		if not editor:
+			QMessageBox.information(self, "No document", "No document is open.")
+			return
+		current_font = editor.font()
 		font, ok = QFontDialog.getFont(current_font, self, "Select Font")
 		if ok:
-			self.current_editor().setFont(font)
+			editor.setFont(font)
 
 	def change_font_size(self):
-		current_font = self.current_editor().font()
+		editor = self.current_editor()
+		if not editor:
+			QMessageBox.information(self, "No document", "No document is open.")
+			return
+		current_font = editor.font()
 		size, ok = QInputDialog.getInt(self, "Font Size", "Enter font size:", current_font.pointSize(), 6, 72)
 		if ok:
 			current_font.setPointSize(size)
-			self.current_editor().setFont(current_font)
+			editor.setFont(current_font)
 
 	def change_line_spacing(self):
-		cursor = self.current_editor().textCursor()
-		block_format = cursor.blockFormat()
+		editor = self.current_editor()
+		if not editor:
+			QMessageBox.information(self, "No document", "No document is open.")
+			return
+		try:
+			cursor = editor.textCursor()
+			block_format = cursor.blockFormat()
 
-		spacing, ok = QInputDialog.getDouble(self, "Line Spacing",
-											 "Enter line spacing multiplier (e.g., 1.0 = normal):",
-											 block_format.lineHeight() / 100.0 if block_format.lineHeight() else 1.0,
-											 0.5, 5.0, 1)
-		if ok:
-			block_format.setLineHeight(spacing * 100, QTextBlockFormat.ProportionalHeight)
-			cursor.setBlockFormat(block_format)
+			spacing, ok = QInputDialog.getDouble(self, "Line Spacing",
+												 "Enter line spacing multiplier (e.g., 1.0 = normal):",
+												 block_format.lineHeight() / 100.0 if block_format.lineHeight() else 1.0,
+												 0.5, 5.0, 1)
+			if ok:
+				block_format.setLineHeight(spacing * 100, QTextBlockFormat.ProportionalHeight)
+				doc = editor.document()
+				cursor.beginEditBlock()
+				block = doc.firstBlock()
+				while block.isValid():
+					cursor.setPosition(block.position())
+					cursor.select(QTextCursor.BlockUnderCursor)
+					cursor.setBlockFormat(block_format)
+					block = block.next()
+				cursor.endEditBlock()
+		except Exception as e:
+			print("Error changing line spacing:", e)
 
 	def open_file_from_browser(self, index):
 		if hasattr(self, 'placeholder_tab') and self.placeholder_tab:
@@ -1594,14 +1662,20 @@ class MainWindow(QMainWindow):
 
 	def _save_to_path(self, path):
 		try:
+			editor = self.current_editor()
+			tab = self.current_tab()
+			if not editor or not isinstance(tab, TextEditorTab):
+				QMessageBox.information(self, "No document", "No document is open to save.")
+				return
+
 			settings = {
-				"font_family": self.current_editor().font().family(),
-				"font_size": self.current_editor().font().pointSize(),
-				"sentence_per_paragraph": self.current_tab().sentence_per_paragraph,
+				"font_family": editor.font().family(),
+				"font_size": editor.font().pointSize(),
+				"sentence_per_paragraph": tab.sentence_per_paragraph,
 				"line_spacing": self._get_line_spacing()
 			}
 
-			content = self.current_editor().toPlainText()
+			content = editor.toPlainText()
 			data = f"\n{content}"
 
 			with open(path, "w", encoding="utf-8") as file:
@@ -1613,18 +1687,23 @@ class MainWindow(QMainWindow):
 
 	def _apply_settings(self, settings):
 		try:
+			editor = self.current_editor()
+			tab = self.current_tab()
+			if not editor or not isinstance(tab, TextEditorTab):
+				return
+
 			font_family = settings.get("font_family", "Consolas")
 			font_size = settings.get("font_size", 14)
 			font = QFont(font_family, font_size)
-			self.current_editor().setFont(font)
+			editor.setFont(font)
 
-			self.current_tab().sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
+			tab.sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
 
 			spacing = settings.get("line_spacing", 1.0)
-			cursor = self.current_editor().textCursor()
+			cursor = editor.textCursor()
 			cursor.beginEditBlock()
 
-			doc = self.current_editor().document()
+			doc = editor.document()
 			block = doc.firstBlock()
 
 			while block.isValid():
@@ -1651,17 +1730,27 @@ class MainWindow(QMainWindow):
 
 	@staticmethod
 	def strip_settings_tag(text):
-		return re.sub(r"", "", text, flags=re.DOTALL)
+		return text
 
 	def _get_line_spacing(self):
-		cursor = self.current_editor().textCursor()
+		editor = self.current_editor()
+		if not editor:
+			return 1.0
+		cursor = editor.textCursor()
 		block_format = cursor.blockFormat()
 		line_height = block_format.lineHeight()
 		return (line_height / 100.0) if line_height > 0 else 1.0
 
 	@pyqtSlot()
 	def reload_rules(self):
-		self.current_linter().load_rules()
+		linter = self.current_linter()
+		if linter:
+			try:
+				linter.load_rules()
+			except Exception as e:
+				print("Error reloading linter rules:", e)
+		else:
+			pass
 		self.supported_filetypes = load_supported_filetypes()
 
 	def navigate_history(self, direction: int):
