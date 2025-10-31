@@ -1,6 +1,8 @@
 import re
 import shutil
 import subprocess
+from pypresence import Presence
+import atexit
 
 from PyQt5.QtWidgets import (
 	QApplication, QMainWindow, QTextEdit, QFileDialog, QAction, QInputDialog, QFontDialog, QDesktopWidget, QStatusBar,
@@ -13,7 +15,22 @@ from PyQt5.QtCore import QRegExp, pyqtSlot, Qt, QRect, QStringListModel
 import sys
 import os
 import json
+import random
 
+IDESTATE = random.randint(0, 5)
+global status
+if IDESTATE == 1:
+	status = "UWAHH! :3"
+elif IDESTATE == 2:
+	status = ":3"
+elif IDESTATE == 3:
+	status = "Haii! <3"
+elif IDESTATE == 4:
+	status = "Lunya :3"
+elif IDESTATE == 5:
+	status = "cute vibes only!"
+else:
+	status = "Editing Something..."
 
 def resource_path(relative_path):
 	base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
@@ -296,15 +313,63 @@ def load_supported_filetypes(path=get_user_config_path("filetypes.json")):
 		print("Failed to load supported filetypes:", e)
 
 	return {'.txt', '.tlxt'}
+class DiscordRPCManager:
+    def __init__(self, client_id, app_name="TLINT Editor"):
+        self.client_id = str(client_id)
+        self.app_name = app_name
+        self.RPC = None
+        self.connected = False
+
+    def connect(self):
+        try:
+            self.RPC = Presence(self.client_id)
+            self.RPC.connect()
+            self.connected = True
+        except Exception as e:
+            print("Discord RPC connect failed:", e)
+            self.connected = False
+
+    def update(self, filename=None):
+        if not self.connected:
+            return
+        try:
+            self.RPC.update(
+				state=status,
+				details=f'Editing "{filename}"' if filename else "No file open",
+				large_image="large",
+				large_text="TLINT Editor"
+			)
+        except Exception as e:
+            print("Discord RPC update failed:", e)
+
+    def close(self):
+        try:
+            if self.RPC:
+                try:
+                    self.RPC.clear()
+                except Exception:
+                    pass
+                try:
+                    self.RPC.close()
+                except Exception:
+                    pass
+        finally:
+            self.connected = False
 
 class MainWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
 		self.setWindowTitle("TLintITE")
+		DISCORD_CLIENT_ID = "1433877002783428648"
+		self.discord_rpc = DiscordRPCManager(DISCORD_CLIENT_ID, app_name="TLINT Editor")
+		self.discord_rpc.connect()
+		atexit.register(self.discord_rpc.close)
+
 		self.load_keybinds()
 
 		self.tabs = QTabWidget()
 		self.tabs.setTabsClosable(True)
+		self.tabs.currentChanged.connect(lambda _: self._update_discord_rpc())
 		self.tabs.tabCloseRequested.connect(self.close_tab)
 		self.setCentralWidget(self.tabs)
 
@@ -377,6 +442,15 @@ class MainWindow(QMainWindow):
 		self.current_file_path = None
 
 		self.supported_filetypes = load_supported_filetypes()
+
+	def _update_discord_rpc(self):
+		tab = self.current_tab()
+		filename = None
+		if isinstance(tab, TextEditorTab) and getattr(tab, "path", None):
+			filename = os.path.basename(tab.path)
+		elif isinstance(tab, TextEditorTab):
+			filename = "Untitled"
+		self.discord_rpc.update(filename)
 
 	def _wire_up_editor(self, editor: CustomTextEdit):
 		editor.textChanged.connect(self.update_counters)
@@ -761,6 +835,7 @@ class MainWindow(QMainWindow):
 		index = self.tabs.addTab(tab, "Untitled")
 		self.tabs.setCurrentIndex(index)
 		self.update_counters()
+		self._update_discord_rpc()
 
 	def replace_text(self, dock):
 		cursor = self.current_editor().textCursor()
@@ -983,7 +1058,7 @@ class MainWindow(QMainWindow):
 						print("Failed to apply settings:", e)
 
 				self.update_counters()
-
+				self._update_discord_rpc()
 
 		except Exception as e:
 			print(e)
@@ -1063,7 +1138,7 @@ class MainWindow(QMainWindow):
 						print("Failed to apply settings:", e)
 
 				self.update_counters()
-
+				self._update_discord_rpc()
 		except Exception as e:
 			print(e)
 			QMessageBox.information(self, "Error:", str(e))
@@ -1073,6 +1148,7 @@ class MainWindow(QMainWindow):
 			tab = self.current_tab()
 			if tab and isinstance(tab, TextEditorTab) and tab.path:
 				self._save_to_path(tab.path)
+				self._update_discord_rpc()
 			else:
 				QMessageBox.information(self, "No path", "No file path is set for this tab.")
 		except Exception as e:
@@ -1087,6 +1163,7 @@ class MainWindow(QMainWindow):
 					path += '.tlxt'
 				self.current_file_path = path
 				self._save_to_path(path)
+				self._update_discord_rpc()
 		except Exception as e:
 			print(e)
 			QMessageBox.information(self, "Error:", e)
@@ -1105,6 +1182,7 @@ class MainWindow(QMainWindow):
 
 			with open(path, "w", encoding="utf-8") as file:
 				file.write(data)
+			self._update_discord_rpc()
 		except Exception as e:
 			print(e)
 			QMessageBox.information(self, "Error:", str(e))
@@ -1139,6 +1217,14 @@ class MainWindow(QMainWindow):
 		except Exception as e:
 			print("Error applying settings:", e)
 
+	def closeEvent(self, event):
+		try:
+			if getattr(self, "discord_rpc", None):
+				self.discord_rpc.close()
+		except Exception:
+			pass
+		super().closeEvent(event)
+
 	@staticmethod
 	def strip_settings_tag(text):
 		return re.sub(r"<__s-e-t-t-i-n-g-s__>.*?</__s-e-t-t-i-n-g-s__>", "", text, flags=re.DOTALL)
@@ -1160,10 +1246,17 @@ if __name__ == "__main__":
 
 	theme_path = get_user_config_path("theme.qss")
 	if os.path.exists(theme_path):
-		with open(theme_path, "r") as file:
-			app.setStyleSheet(file.read())
+		try:
+			with open(theme_path, "r", encoding="utf-8") as file:
+				app.setStyleSheet(file.read())
+		except Exception as e:
+			print("Could not apply stylesheet:", e)
 
 	window = MainWindow()
 	window.resize(1540, 900)
 	window.show()
+	try:
+		window._update_discord_rpc()
+	except Exception:
+		pass
 	sys.exit(app.exec_())
