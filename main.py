@@ -706,11 +706,30 @@ class MainWindow(QMainWindow):
 	def save_raw_file(self):
 		try:
 			tab = self.current_tab()
-			if tab and isinstance(tab, TextEditorTab) and tab.path:
-				with open(tab.path, "w", encoding="utf-8") as file:
-					file.write(tab.editor.toPlainText())
+			if not tab or not isinstance(tab, TextEditorTab):
+				QMessageBox.information(self, "No document", "No document is open to save.")
+				return
+
+			if getattr(tab, "path", None):
+				raw_path = tab.path
 			else:
-				QMessageBox.information(self, "No path", "No file path is set for this tab.")
+				default_name = "untitled.txt"
+				raw_path, _ = QFileDialog.getSaveFileName(self, "Save (Raw) As", default_name, "Text Files (*.txt);;All Files (*)")
+				if not raw_path:
+					return
+				if not os.path.splitext(raw_path)[1]:
+					raw_path += ".txt"
+				tab.path = raw_path
+				idx = self.tabs.currentIndex()
+				if idx != -1:
+					self.tabs.setTabText(idx, os.path.basename(raw_path))
+				self.current_file_path = raw_path
+
+			content = self.strip_settings_tag(tab.editor.toPlainText())
+			with open(raw_path, "w", encoding="utf-8") as file:
+				file.write(content)
+
+			self._update_discord_rpc()
 		except Exception as e:
 			print(e)
 			QMessageBox.information(self, "Error:", str(e))
@@ -1146,27 +1165,42 @@ class MainWindow(QMainWindow):
 	def save_file(self):
 		try:
 			tab = self.current_tab()
-			if tab and isinstance(tab, TextEditorTab) and tab.path:
+			if tab and isinstance(tab, TextEditorTab) and getattr(tab, "path", None):
 				self._save_to_path(tab.path)
 				self._update_discord_rpc()
 			else:
-				QMessageBox.information(self, "No path", "No file path is set for this tab.")
+				self.save_as_file()
 		except Exception as e:
 			print(e)
-			QMessageBox.information(self, "Error:", str(e))
+			QMessageBox.information(self, "Error", str(e))
 
 	def save_as_file(self):
 		try:
-			path, _ = QFileDialog.getSaveFileName(self, "Save As", "", "TLintITE Files (*.tlxt)")
-			if path:
-				if not path.endswith('.tlxt'):
-					path += '.tlxt'
-				self.current_file_path = path
-				self._save_to_path(path)
-				self._update_discord_rpc()
+			tab = self.current_tab()
+			if not tab or not isinstance(tab, TextEditorTab):
+				QMessageBox.information(self, "No document", "No document is open to save.")
+				return
+
+			default_name = os.path.basename(tab.path) if getattr(tab, "path", None) else "untitled.tlxt"
+			path, _ = QFileDialog.getSaveFileName(self, "Save As", default_name, "TLintITE Files (*.tlxt);;Text Files (*.txt);;All Files (*)")
+			if not path:
+				return
+
+			if not os.path.splitext(path)[1]:
+				path += ".tlxt"
+
+			tab.path = path
+			self.current_file_path = path
+			idx = self.tabs.currentIndex()
+			if idx != -1:
+				self.tabs.setTabText(idx, os.path.basename(path))
+
+			self._save_to_path(path)
+			self._update_discord_rpc()
+
 		except Exception as e:
 			print(e)
-			QMessageBox.information(self, "Error:", e)
+			QMessageBox.information(self, "Error", str(e))
 
 	def _save_to_path(self, path):
 		try:
