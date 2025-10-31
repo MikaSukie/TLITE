@@ -5,13 +5,14 @@ from pypresence import Presence
 import atexit
 
 from PyQt5.QtWidgets import (
-	QApplication, QMainWindow, QTextEdit, QFileDialog, QAction, QInputDialog, QFontDialog, QDesktopWidget, QStatusBar,
+	QApplication, QMainWindow, QTextEdit, QFileDialog, QAction, QInputDialog, QFontDialog, QStatusBar,
 	QHBoxLayout, QPushButton, QCheckBox, QLabel, QLineEdit, QVBoxLayout, QWidget, QDockWidget, QDialog, QMessageBox,
-	QCompleter, QTreeView, QFileSystemModel, QPlainTextEdit, QTabWidget, QTabBar
+	QCompleter, QTreeView, QFileSystemModel, QPlainTextEdit, QTabWidget, QTabBar, QHeaderView, QMenu,
+	QComboBox, QScrollArea, QFormLayout
 )
 from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont, QTextBlockFormat, QPainter, QPen, \
 	QTextDocument, QTextCursor
-from PyQt5.QtCore import QRegExp, pyqtSlot, Qt, QRect, QStringListModel
+from PyQt5.QtCore import QRegExp, pyqtSlot, Qt, QRect, QStringListModel, QEvent
 import sys
 import os
 import json
@@ -48,11 +49,12 @@ def setup_user_config():
 	if not os.path.exists(USER_CONFIG_DIR):
 		os.makedirs(USER_CONFIG_DIR, exist_ok=True)
 		default_config_dir = resource_path("config")
-		for file in os.listdir(default_config_dir):
-			src = os.path.join(default_config_dir, file)
-			dst = os.path.join(USER_CONFIG_DIR, file)
-			if os.path.isfile(src):
-				shutil.copyfile(src, dst)
+		if os.path.isdir(default_config_dir):
+			for file in os.listdir(default_config_dir):
+				src = os.path.join(default_config_dir, file)
+				dst = os.path.join(USER_CONFIG_DIR, file)
+				if os.path.isfile(src):
+					shutil.copyfile(src, dst)
 
 class PlaceholderTab(QWidget):
 	def __init__(self):
@@ -64,6 +66,9 @@ class PlaceholderTab(QWidget):
 		layout.addWidget(label)
 
 class KeybindEditorDialog(QDialog):
+	"""
+	Scrollable, screen-size-aware keybind editor so it won't overflow small screens.
+	"""
 	def __init__(self, keybinds, parent=None):
 		super().__init__(parent)
 		self.setWindowTitle("Edit Keybindings")
@@ -71,28 +76,43 @@ class KeybindEditorDialog(QDialog):
 		self.init_ui()
 
 	def init_ui(self):
-		layout = QVBoxLayout()
+		screen = QApplication.primaryScreen()
+		if screen:
+			geom = screen.availableGeometry()
+			max_w = int(geom.width() * 0.8)
+			max_h = int(geom.height() * 0.8)
+			self.setMaximumSize(max_w, max_h)
+			self.setMinimumSize(480, 320)
+		else:
+			self.setMinimumSize(480, 320)
+
+		outer_layout = QVBoxLayout(self)
+
+		scroll = QScrollArea()
+		scroll.setWidgetResizable(True)
+		content = QWidget()
+		form = QFormLayout(content)
 
 		self.inputs = {}
-		for action, key in self.keybinds.items():
-			row = QHBoxLayout()
-			label = QLabel(action.replace("_", " ").title() + ":")
-			input_field = QLineEdit(key)
-			self.inputs[action] = input_field
-			row.addWidget(label)
-			row.addWidget(input_field)
-			layout.addLayout(row)
+		for action in sorted(self.keybinds.keys()):
+			label_text = action.replace("_", " ").title()
+			line = QLineEdit(self.keybinds[action])
+			form.addRow(QLabel(label_text + ":"), line)
+			self.inputs[action] = line
+
+		scroll.setWidget(content)
+		outer_layout.addWidget(scroll)
 
 		button_layout = QHBoxLayout()
 		save_btn = QPushButton("Save")
 		cancel_btn = QPushButton("Cancel")
 		save_btn.clicked.connect(self.save)
 		cancel_btn.clicked.connect(self.reject)
+		button_layout.addStretch(1)
 		button_layout.addWidget(save_btn)
 		button_layout.addWidget(cancel_btn)
 
-		layout.addLayout(button_layout)
-		self.setLayout(layout)
+		outer_layout.addLayout(button_layout)
 
 	def save(self):
 		for action, field in self.inputs.items():
@@ -101,7 +121,6 @@ class KeybindEditorDialog(QDialog):
 
 	def get_keybinds(self):
 		return self.keybinds
-
 
 class EnglishLinter(QSyntaxHighlighter):
 	def __init__(self, document, rules_path=get_user_config_path("linting.json")):
@@ -118,12 +137,12 @@ class EnglishLinter(QSyntaxHighlighter):
 					rules_data = json.load(file)
 					for rule in rules_data:
 						fmt = QTextCharFormat()
-						fmt.setForeground(QColor(rule["color"]))
-						regex = QRegExp(f"\\b{rule['word']}\\b", Qt.CaseInsensitive)
+						fmt.setForeground(QColor(rule.get("color", "#ff0000")))
+						regex = QRegExp(f"\\b{re.escape(rule['word'])}\\b", Qt.CaseInsensitive)
 						self.rules.append((regex, fmt))
 			self.rehighlight()
 		except Exception as e:
-			print(e)
+			print("Linter load_rules error:", e)
 
 	def highlightBlock(self, text):
 		default_format = QTextCharFormat()
@@ -137,9 +156,6 @@ class EnglishLinter(QSyntaxHighlighter):
 				self.setFormat(index, length, fmt)
 				index = pattern.indexIn(text, index + length)
 
-	def get_words(self):
-		return [rule['word'] for rule in self.load_rules_from_file()]
-
 	def load_rules_from_file(self):
 		try:
 			if os.path.exists(self.rules_path):
@@ -147,7 +163,14 @@ class EnglishLinter(QSyntaxHighlighter):
 					return json.load(file)
 			return []
 		except Exception as e:
-			print(e)
+			print("Linter load_rules_from_file error:", e)
+			return []
+
+	def get_words(self):
+		try:
+			return [r.get("word", "") for r in self.load_rules_from_file()]
+		except Exception:
+			return []
 
 
 class FindReplaceDock(QDockWidget):
@@ -183,7 +206,7 @@ class FindReplaceDock(QDockWidget):
 		self.setWidget(container)
 
 
-class CustomTextEdit(QTextEdit):
+class CustomTextEdit(QPlainTextEdit):
 	def __init__(self, plain_paste_callback=None, parent_tab=None, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.parent_tab = parent_tab
@@ -196,11 +219,14 @@ class CustomTextEdit(QTextEdit):
 		self.model = QStringListModel()
 		self.completer.setModel(self.model)
 
+		self.match_info = None
+
+		self.cursorPositionChanged.connect(self._on_cursor_moved)
+
 	def paste(self):
 		if self.get_plain_paste_enabled and self.get_plain_paste_enabled():
 			clipboard = QApplication.clipboard()
 			text = clipboard.text()
-
 			self.insertPlainText(text)
 		else:
 			super().paste()
@@ -252,6 +278,89 @@ class CustomTextEdit(QTextEdit):
 				event.ignore()
 				return
 
+		key = event.key()
+		mods = event.modifiers()
+
+		is_backtab = (key == Qt.Key_Backtab) or ((key == Qt.Key_Tab) and (mods & Qt.ShiftModifier))
+		is_tab = (key == Qt.Key_Tab) and not (mods & Qt.ControlModifier) and not (mods & Qt.AltModifier) and not (mods & Qt.MetaModifier) and not (mods & Qt.ShiftModifier)
+
+		if is_tab or is_backtab:
+			cursor = self.textCursor()
+			if cursor.hasSelection():
+				event.accept()
+				try:
+					doc = self.document()
+					sel_start = cursor.selectionStart()
+					sel_end = cursor.selectionEnd()
+
+					end_block = doc.findBlock(sel_end)
+					if sel_end > 0 and end_block.isValid() and end_block.position() == sel_end:
+						sel_end = max(0, sel_end - 1)
+
+					start_block = doc.findBlock(sel_start)
+					end_block = doc.findBlock(sel_end)
+
+					start_blk_num = start_block.blockNumber()
+					end_blk_num = end_block.blockNumber()
+
+					blocks = []
+					b = start_block
+					while b.isValid():
+						blocks.append(b)
+						if b == end_block:
+							break
+						b = b.next()
+
+					collapse_cursor = QTextCursor(doc)
+					collapse_cursor.setPosition(sel_start)
+					self.setTextCursor(collapse_cursor)
+
+					edit_cursor = QTextCursor(doc)
+					edit_cursor.beginEditBlock()
+
+					if is_tab:
+						for b in reversed(blocks):
+							pos = b.position()
+							edit_cursor.setPosition(pos)
+							edit_cursor.insertText('\t')
+					else:
+						for b in reversed(blocks):
+							pos = b.position()
+							text = b.text()
+							remove_count = 0
+							if text.startswith('\t'):
+								remove_count = 1
+							elif text.startswith('	'):
+								remove_count = 4
+							if remove_count > 0:
+								edit_cursor.setPosition(pos)
+								edit_cursor.setPosition(pos + remove_count, QTextCursor.KeepAnchor)
+								edit_cursor.removeSelectedText()
+
+					edit_cursor.endEditBlock()
+
+					doc_after = self.document()
+					new_start_block = doc_after.findBlockByNumber(start_blk_num)
+					new_end_block = doc_after.findBlockByNumber(end_blk_num)
+					new_sel_start = new_start_block.position()
+					new_sel_end = max(new_sel_start, new_end_block.position() + new_end_block.length() - 1)
+					restore_cursor = QTextCursor(doc_after)
+					restore_cursor.setPosition(new_sel_start)
+					restore_cursor.setPosition(new_sel_end, QTextCursor.KeepAnchor)
+					self.setTextCursor(restore_cursor)
+
+					self.ensureCursorVisible()
+					return
+
+				except Exception as e:
+					print("Indent/dedent error:", e)
+					super().keyPressEvent(event)
+					return
+			else:
+				event.accept()
+				super().keyPressEvent(event)
+				return
+
 		super().keyPressEvent(event)
 
 		cursor = self.textCursor()
@@ -260,23 +369,117 @@ class CustomTextEdit(QTextEdit):
 
 		if not current_word or current_word.isspace():
 			self.completer.popup().hide()
+		else:
+			suggestions = self.generateInstaplaceSuggestions(current_word)
+			if suggestions:
+				self.model.setStringList(suggestions)
+				self.completer.setCompletionPrefix(current_word)
+				rect = self.cursorRect()
+				popup = self.completer.popup()
+				popup_size = popup.sizeHintForColumn(0) + 20
+				popup.setFixedWidth(popup_size)
+				self.completer.complete(rect)
+			else:
+				self.completer.popup().hide()
+
+	def _on_cursor_moved(self):
+		self._update_bracket_matches()
+
+	def _update_bracket_matches(self):
+		txt = self.toPlainText()
+		pos = self.textCursor().position()
+		length = len(txt)
+		if length == 0:
+			self.match_info = None
+			self._apply_bracket_extra_selections()
 			return
 
-		suggestions = self.generateInstaplaceSuggestions(current_word)
+		check_positions = []
+		if pos > 0:
+			check_positions.append(pos - 1)
+		if pos < length:
+			check_positions.append(pos)
 
-		if suggestions:
-			self.model.setStringList(suggestions)
-			self.completer.setCompletionPrefix(current_word)
-			rect = self.cursorRect()
-			popup = self.completer.popup()
+		bracket_pairs = {'(': ')', '[': ']', '{': '}', ')': '(', ']': '[', '}': '{'}
+		opening = '([{'
+		closing = ')]}'
 
-			popup_size = popup.sizeHintForColumn(0) + 20
-			popup.setFixedWidth(popup_size)
+		found = False
+		for p in check_positions:
+			if p < 0 or p >= length:
+				continue
+			c = txt[p]
+			if c in bracket_pairs:
+				found = True
+				if c in opening:
+					match_pos = self._find_matching_forward(txt, p, c, bracket_pairs[c])
+					matched = match_pos is not None
+					self.match_info = {'pos1': p, 'pos2': match_pos, 'matched': matched, 'open_pos': p, 'close_pos': match_pos}
+				else:
+					match_pos = self._find_matching_backward(txt, p, bracket_pairs[c], c)
+					matched = match_pos is not None
+					self.match_info = {'pos1': match_pos, 'pos2': p, 'matched': matched, 'open_pos': match_pos, 'close_pos': p}
+				break
 
-			self.completer.complete(rect)
+		if not found:
+			self.match_info = None
 
-		else:
-			self.completer.popup().hide()
+		self._apply_bracket_extra_selections()
+
+	def _find_matching_forward(self, text, start_pos, open_ch, close_ch):
+		depth = 0
+		for i in range(start_pos, len(text)):
+			ch = text[i]
+			if ch == open_ch:
+				depth += 1
+			elif ch == close_ch:
+				depth -= 1
+				if depth == 0:
+					return i
+		return None
+
+	def _find_matching_backward(self, text, start_pos, open_ch, close_ch):
+		depth = 0
+		for i in range(start_pos, -1, -1):
+			ch = text[i]
+			if ch == close_ch:
+				depth += 1
+			elif ch == open_ch:
+				depth -= 1
+				if depth == 0:
+					return i
+		return None
+
+	def _apply_bracket_extra_selections(self):
+		extra = []
+		fmt_matched = QTextCharFormat()
+		fmt_matched.setBackground(QColor(60, 120, 180, 140))
+		fmt_unmatched = QTextCharFormat()
+		fmt_unmatched.setBackground(QColor(220, 80, 80, 200))
+
+		if self.match_info:
+			mi = self.match_info
+			if mi.get('pos1') is not None:
+				if mi['matched'] and mi.get('pos2') is not None:
+					for p in (mi['pos1'], mi['pos2']):
+						sel = QPlainTextEdit.ExtraSelection()
+						cursor = self.textCursor()
+						cursor.setPosition(p)
+						cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, 1)
+						sel.cursor = cursor
+						sel.format = fmt_matched
+						extra.append(sel)
+				else:
+					present_pos = mi['pos1'] if mi['pos1'] is not None else mi['pos2']
+					sel = QPlainTextEdit.ExtraSelection()
+					cursor = self.textCursor()
+					cursor.setPosition(present_pos)
+					cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, 1)
+					sel.cursor = cursor
+					sel.format = fmt_unmatched
+					extra.append(sel)
+
+		self.setExtraSelections(extra)
 
 class TextEditorTab(QWidget):
 	def __init__(self, get_plain_paste_callback, suggestions_enabled=True, instaplace_rules=None):
@@ -313,48 +516,67 @@ def load_supported_filetypes(path=get_user_config_path("filetypes.json")):
 		print("Failed to load supported filetypes:", e)
 
 	return {'.txt', '.tlxt'}
+
 class DiscordRPCManager:
-    def __init__(self, client_id, app_name="TLINT Editor"):
-        self.client_id = str(client_id)
-        self.app_name = app_name
-        self.RPC = None
-        self.connected = False
+	def __init__(self, client_id, app_name="TLINT Editor"):
+		self.client_id = str(client_id)
+		self.app_name = app_name
+		self.RPC = None
+		self.connected = False
 
-    def connect(self):
-        try:
-            self.RPC = Presence(self.client_id)
-            self.RPC.connect()
-            self.connected = True
-        except Exception as e:
-            print("Discord RPC connect failed:", e)
-            self.connected = False
+	def connect(self):
+		try:
+			self.RPC = Presence(self.client_id)
+			self.RPC.connect()
+			self.connected = True
+		except Exception as e:
+			print("Discord RPC connect failed:", e)
+			self.connected = False
 
-    def update(self, filename=None):
-        if not self.connected:
-            return
-        try:
-            self.RPC.update(
+	def update(self, filename=None):
+		if not self.connected:
+			return
+		try:
+			self.RPC.update(
 				state=status,
 				details=f'Editing "{filename}"' if filename else "No file open",
 				large_image="large",
 				large_text="TLINT Editor"
 			)
-        except Exception as e:
-            print("Discord RPC update failed:", e)
+		except Exception as e:
+			print("Discord RPC update failed:", e)
 
-    def close(self):
-        try:
-            if self.RPC:
-                try:
-                    self.RPC.clear()
-                except Exception:
-                    pass
-                try:
-                    self.RPC.close()
-                except Exception:
-                    pass
-        finally:
-            self.connected = False
+	def close(self):
+		try:
+			if self.RPC:
+				try:
+					self.RPC.clear()
+				except Exception:
+					pass
+				try:
+					self.RPC.close()
+				except Exception:
+					pass
+		finally:
+			self.connected = False
+
+class TerminalLineEdit(QLineEdit):
+	"""
+	QLineEdit subclass that routes Up/Down keys to the main window's history navigation.
+	"""
+	def __init__(self, mainwindow=None, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.mainwindow = mainwindow
+
+	def keyPressEvent(self, event):
+		if self.mainwindow and event.key() in (Qt.Key_Up, Qt.Key_Down):
+			if event.key() == Qt.Key_Up:
+				self.mainwindow.navigate_history(-1)
+			else:
+				self.mainwindow.navigate_history(1)
+			return
+		super().keyPressEvent(event)
+
 
 class MainWindow(QMainWindow):
 	def __init__(self):
@@ -376,14 +598,8 @@ class MainWindow(QMainWindow):
 		self.placeholder_tab = None
 		self.show_placeholder_tab()
 
-		self.outline_mode = "None"
-		if isinstance(self.current_tab(), TextEditorTab):
-			editor = self.current_editor()
-			if editor:
-				editor.viewport().installEventFilter(self)
-
 		self.init_menu()
-		self.current_tab().sentence_per_paragraph = 3
+		self.apply_keybinds()
 		self.setStatusBar(QStatusBar())
 
 		self.instaplace_checkbox = QCheckBox("Instaplace")
@@ -397,13 +613,6 @@ class MainWindow(QMainWindow):
 
 		self.suggestions_enabled = False
 
-		editor = self.current_editor()
-		if editor:
-			editor.textChanged.connect(self.update_counters)
-			editor.textChanged.connect(self.apply_instaplace_live)
-
-		self.update_counters()
-
 		self.find_dock = FindReplaceDock(self)
 
 		self.terminal_dock = QDockWidget("Terminal", self)
@@ -412,11 +621,29 @@ class MainWindow(QMainWindow):
 		terminal_container = QWidget()
 		terminal_layout = QVBoxLayout(terminal_container)
 
+		controls_layout = QHBoxLayout()
+		self.terminal_profile_combo = QComboBox()
+		if sys.platform.startswith("win"):
+			self.terminal_profile_combo.addItems(["PowerShell", "CMD"])
+		elif sys.platform == "darwin":
+			self.terminal_profile_combo.addItems(["Terminal (zsh)"])
+		else:
+			self.terminal_profile_combo.addItems(["bash", "zsh", "fish"])
+		controls_layout.addWidget(QLabel("Profile:"))
+		controls_layout.addWidget(self.terminal_profile_combo)
+		controls_layout.addStretch(1)
+		clear_btn = QPushButton("Clear")
+		clear_btn.setToolTip("Clear terminal output")
+		clear_btn.clicked.connect(lambda: self.terminal_output.clear())
+		controls_layout.addWidget(clear_btn)
+		terminal_layout.addLayout(controls_layout)
+
 		self.terminal_output = QPlainTextEdit()
 		self.terminal_output.setReadOnly(True)
 		self.terminal_output.setStyleSheet("background-color: #1e1e1e; color: white;")
+		self.terminal_output.setMaximumBlockCount(1000)
 
-		self.terminal_input = QLineEdit()
+		self.terminal_input = TerminalLineEdit(mainwindow=self)
 		self.terminal_input.setPlaceholderText("Enter command...")
 		self.terminal_input.returnPressed.connect(self.run_terminal_command)
 
@@ -443,6 +670,127 @@ class MainWindow(QMainWindow):
 
 		self.supported_filetypes = load_supported_filetypes()
 
+		self.terminal_history = []
+		self._history_index = len(self.terminal_history)
+
+	def indent_selection(self):
+		editor = self.current_editor()
+		if not editor:
+			return
+		doc = editor.document()
+		cursor = editor.textCursor()
+		if not cursor.hasSelection():
+			cursor.insertText('\t')
+			return
+
+		sel_start = cursor.selectionStart()
+		sel_end = cursor.selectionEnd()
+		end_block = doc.findBlock(sel_end)
+		if sel_end > 0 and end_block.isValid() and end_block.position() == sel_end:
+			sel_end = max(0, sel_end - 1)
+
+		start_block = doc.findBlock(sel_start)
+		end_block = doc.findBlock(sel_end)
+
+		blocks = []
+		b = start_block
+		while b.isValid():
+			blocks.append(b)
+			if b == end_block:
+				break
+			b = b.next()
+
+		edit_cursor = QTextCursor(doc)
+		edit_cursor.beginEditBlock()
+		for b in reversed(blocks):
+			pos = b.position()
+			edit_cursor.setPosition(pos)
+			edit_cursor.insertText('\t')
+		edit_cursor.endEditBlock()
+
+		doc_after = editor.document()
+		new_start = doc_after.findBlockByNumber(start_block.blockNumber()).position()
+		new_end_block = doc_after.findBlockByNumber(end_block.blockNumber())
+		new_end = max(new_start, new_end_block.position() + new_end_block.length() - 1)
+		new_cursor = QTextCursor(doc_after)
+		new_cursor.setPosition(new_start)
+		new_cursor.setPosition(new_end, QTextCursor.KeepAnchor)
+		editor.setTextCursor(new_cursor)
+		editor.ensureCursorVisible()
+
+	def dedent_selection(self):
+		editor = self.current_editor()
+		if not editor:
+			return
+		doc = editor.document()
+		cursor = editor.textCursor()
+		if not cursor.hasSelection():
+			pos = cursor.position()
+			block = doc.findBlock(pos)
+			bt = block.text()
+			block_pos = block.position()
+			if pos == block_pos:
+				if bt.startswith('\t'):
+					rem_cursor = QTextCursor(doc)
+					rem_cursor.setPosition(block_pos)
+					rem_cursor.setPosition(block_pos + 1, QTextCursor.KeepAnchor)
+					rem_cursor.removeSelectedText()
+			return
+
+		sel_start = cursor.selectionStart()
+		sel_end = cursor.selectionEnd()
+		end_block = doc.findBlock(sel_end)
+		if sel_end > 0 and end_block.isValid() and end_block.position() == sel_end:
+			sel_end = max(0, sel_end - 1)
+
+		start_block = doc.findBlock(sel_start)
+		end_block = doc.findBlock(sel_end)
+
+		blocks = []
+		b = start_block
+		while b.isValid():
+			blocks.append(b)
+			if b == end_block:
+				break
+			b = b.next()
+
+		edit_cursor = QTextCursor(doc)
+		edit_cursor.beginEditBlock()
+		for b in reversed(blocks):
+			pos = b.position()
+			text = b.text()
+			remove_count = 0
+			if text.startswith('\t'):
+				remove_count = 1
+			elif text.startswith('	'):
+				remove_count = 4
+			if remove_count > 0:
+				edit_cursor.setPosition(pos)
+				edit_cursor.setPosition(pos + remove_count, QTextCursor.KeepAnchor)
+				edit_cursor.removeSelectedText()
+		edit_cursor.endEditBlock()
+
+		doc_after = editor.document()
+		new_start = doc_after.findBlockByNumber(start_block.blockNumber()).position()
+		new_end_block = doc_after.findBlockByNumber(end_block.blockNumber())
+		new_end = max(new_start, new_end_block.position() + new_end_block.length() - 1)
+		new_cursor = QTextCursor(doc_after)
+		new_cursor.setPosition(new_start)
+		new_cursor.setPosition(new_end, QTextCursor.KeepAnchor)
+		editor.setTextCursor(new_cursor)
+		editor.ensureCursorVisible()
+
+
+	def reload_keybinds(self):
+		try:
+			self.load_keybinds()
+			self.apply_keybinds()
+			QMessageBox.information(self, "Keybindings Reloaded", "Keybindings reloaded and applied.")
+		except Exception as e:
+			print("Failed to reload keybinds:", e)
+			QMessageBox.information(self, "Error reloading keybindings", str(e))
+
+
 	def _update_discord_rpc(self):
 		tab = self.current_tab()
 		filename = None
@@ -455,6 +803,7 @@ class MainWindow(QMainWindow):
 	def _wire_up_editor(self, editor: CustomTextEdit):
 		editor.textChanged.connect(self.update_counters)
 		editor.textChanged.connect(self.apply_instaplace_live)
+		editor.viewport().installEventFilter(self)
 
 	def show_placeholder_tab(self):
 		if self.placeholder_tab is not None:
@@ -502,18 +851,44 @@ class MainWindow(QMainWindow):
 		if not command:
 			return
 
-		if command.lower() == "clear" or command.lower() == "cls":
+		if command.lower() in ("clear", "cls"):
 			self.terminal_output.clear()
 			self.terminal_input.clear()
 			return
 
+		profile = self.terminal_profile_combo.currentText()
+
+		self.terminal_history.append(command)
+		self._history_index = len(self.terminal_history)
+
 		self.terminal_output.appendPlainText(f"> {command}")
 
 		try:
-			result = subprocess.run(
-				command, shell=True, check=False,
-				stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-			)
+			proc_args = None
+			if profile.lower() in ("bash",):
+				proc_args = ["/bin/bash", "-ic", command]
+			elif profile.lower() in ("zsh",):
+				proc_args = ["/bin/zsh", "-ic", command]
+			elif profile.lower() in ("fish",):
+				proc_args = ["fish", "-c", command]
+			elif profile.lower().startswith("terminal") and sys.platform == "darwin":
+				proc_args = ["/bin/zsh", "-ic", command]
+			elif profile.lower() in ("powershell", "powershell.exe"):
+				proc_args = ["powershell", "-NoProfile", "-Command", command]
+			elif profile.lower() == "cmd":
+				proc_args = ["cmd", "/C", command]
+			else:
+				result = subprocess.run(command, shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+				output = result.stdout.strip()
+				error = result.stderr.strip()
+				if output:
+					self.terminal_output.appendPlainText(output)
+				if error:
+					self.terminal_output.appendPlainText(f"[stderr]\n{error}")
+				self.terminal_input.clear()
+				return
+
+			result = subprocess.run(proc_args, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 			output = result.stdout.strip()
 			error = result.stderr.strip()
 
@@ -533,7 +908,6 @@ class MainWindow(QMainWindow):
 		file_menu = menu_bar.addMenu("File")
 		edit_menu = menu_bar.addMenu("Edit")
 		docs_menu = menu_bar.addMenu("Docs")
-		outlines_menu = menu_bar.addMenu("Outlines")
 		window_menu = menu_bar.addMenu("Window")
 
 		open_action = QAction("Open", self)
@@ -551,6 +925,16 @@ class MainWindow(QMainWindow):
 		new_action = QAction("New", self)
 		new_action.setObjectName("new_action")
 		new_action.triggered.connect(self.new_document)
+
+		indent_act = QAction("Indent (Ctrl+])", self)
+		indent_act.setShortcut("Ctrl+]")
+		indent_act.triggered.connect(self.indent_selection)
+		edit_menu.addAction(indent_act)
+
+		dedent_act = QAction("Dedent (Ctrl+[)", self)
+		dedent_act.setShortcut("Ctrl+[")
+		dedent_act.triggered.connect(self.dedent_selection)
+		edit_menu.addAction(dedent_act)
 
 		file_menu.addAction(new_action)
 		file_menu.addAction(open_action)
@@ -584,22 +968,6 @@ class MainWindow(QMainWindow):
 		line_spacing_action.setObjectName("line_spacing_action")
 		line_spacing_action.triggered.connect(self.change_line_spacing)
 
-		none_action = QAction("None", self)
-		none_action.setObjectName("none_action")
-		none_action.triggered.connect(lambda: self.set_outline("None"))
-
-		a4_action = QAction("A4", self)
-		a4_action.setObjectName("a4_action")
-		a4_action.triggered.connect(lambda: self.set_outline("A4"))
-
-		iso216_action = QAction("ISO216", self)
-		iso216_action.setObjectName("iso216_action")
-		iso216_action.triggered.connect(lambda: self.set_outline("ISO216"))
-
-		outlines_menu.addAction(none_action)
-		outlines_menu.addAction(a4_action)
-		outlines_menu.addAction(iso216_action)
-
 		find_action = QAction("Find & Replace", self)
 		find_action.setObjectName("find_action")
 		find_action.triggered.connect(self.toggle_find_replace)
@@ -620,7 +988,7 @@ class MainWindow(QMainWindow):
 
 		reload_keybinds_action = QAction("Reload Keybindings", self)
 		reload_keybinds_action.setObjectName("reload_keybinds_action")
-		reload_keybinds_action.triggered.connect(lambda: (self.load_keybinds(), self.init_menu()))
+		reload_keybinds_action.triggered.connect(self.reload_keybinds)
 		edit_menu.addAction(reload_keybinds_action)
 
 		toggle_instaplace_action = QAction("Toggle Instaplace (Live Replace)", self)
@@ -659,6 +1027,19 @@ class MainWindow(QMainWindow):
 		self.tree_view.setRootIndex(self.file_model.index(os.path.expanduser("~")))
 		self.tree_view.doubleClicked.connect(self.open_file_from_browser)
 
+		for col in range(1, 4):
+			try:
+				self.tree_view.setColumnHidden(col, True)
+			except Exception:
+				pass
+
+		header = self.tree_view.header()
+		header.setSectionResizeMode(0, QHeaderView.Interactive)
+		header.resizeSection(0, 260)
+
+		self.tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
+		self.tree_view.customContextMenuRequested.connect(self.on_tree_context_menu)
+
 		self.file_browser.setWidget(self.tree_view)
 		self.addDockWidget(Qt.LeftDockWidgetArea, self.file_browser)
 
@@ -669,10 +1050,102 @@ class MainWindow(QMainWindow):
 		reload_all_action.setShortcut(self.keybinds.get("reload_all_rules", "Ctrl+Shift+R"))
 		reload_rules_action.setShortcut(self.keybinds.get("reload_rules", "Ctrl+R"))
 		reload_instaplace_action.setShortcut(self.keybinds.get("reload_instaplace", "Ctrl+Shift+I"))
-		find_action.setShortcut(self.keybinds.get("find_replace", "Ctrl+F")),
+		find_action.setShortcut(self.keybinds.get("find_replace", "Ctrl+F"))
 		toggle_instaplace_action.setShortcut(self.keybinds.get("toggle_instaplace", "Ctrl+W"))
 		toggle_suggestions_action.setShortcut(self.keybinds.get("toggle_suggestions", "Ctrl+E"))
 
+	def on_tree_context_menu(self, qpoint):
+		index = self.tree_view.indexAt(qpoint)
+		path = None
+		is_dir = False
+
+		if index.isValid():
+			path = self.file_model.filePath(index)
+			is_dir = os.path.isdir(path)
+		else:
+			path = self.file_model.rootPath()
+			is_dir = True
+
+		menu = QMenu()
+		new_file_action = menu.addAction("New File")
+		new_folder_action = menu.addAction("New Folder")
+		delete_action = menu.addAction("Delete")
+
+		action = menu.exec_(self.tree_view.viewport().mapToGlobal(qpoint))
+		if action == new_file_action:
+			name, ok = QInputDialog.getText(self, "Create New File", "Filename:")
+			if ok and name:
+				if os.path.isdir(path):
+					dirpath = path
+				else:
+					dirpath = os.path.dirname(path)
+				newpath = os.path.join(dirpath, name)
+				try:
+					if not os.path.splitext(newpath)[1]:
+						newpath += ".txt"
+					with open(newpath, "x", encoding="utf-8") as f:
+						f.write("")
+					self.file_model.setRootPath(self.file_model.rootPath())
+					parent_idx = self.file_model.index(dirpath)
+					if parent_idx.isValid():
+						self.tree_view.expand(parent_idx)
+				except FileExistsError:
+					QMessageBox.information(self, "Create File", "File already exists.")
+				except Exception as e:
+					QMessageBox.information(self, "Error", f"Failed to create file: {e}")
+
+		elif action == new_folder_action:
+			name, ok = QInputDialog.getText(self, "Create New Folder", "Folder name:")
+			if ok and name:
+				if os.path.isdir(path):
+					dirpath = path
+				else:
+					dirpath = os.path.dirname(path)
+				newpath = os.path.join(dirpath, name)
+				try:
+					os.makedirs(newpath, exist_ok=False)
+					self.file_model.setRootPath(self.file_model.rootPath())
+					parent_idx = self.file_model.index(dirpath)
+					if parent_idx.isValid():
+						self.tree_view.expand(parent_idx)
+				except FileExistsError:
+					QMessageBox.information(self, "Create Folder", "Folder already exists.")
+				except Exception as e:
+					QMessageBox.information(self, "Error", f"Failed to create folder: {e}")
+
+		elif action == delete_action:
+			if not index.isValid():
+				QMessageBox.information(self, "Delete", "No file or folder selected to delete.")
+				return
+
+			filepath = self.file_model.filePath(index)
+			root_path = os.path.abspath(self.file_model.rootPath())
+			try:
+				target_path = os.path.abspath(filepath)
+			except Exception:
+				target_path = filepath
+
+			if target_path == root_path:
+				QMessageBox.information(self, "Delete", "Cannot delete the root path.")
+				return
+
+			confirm = QMessageBox.question(self, "Delete", f"Delete '{os.path.basename(filepath)}'?", QMessageBox.Yes | QMessageBox.No)
+			if confirm != QMessageBox.Yes:
+				return
+
+			try:
+				if os.path.isdir(filepath):
+					shutil.rmtree(filepath)
+				else:
+					os.remove(filepath)
+				parent_dir = os.path.dirname(filepath)
+				self.file_model.setRootPath(self.file_model.rootPath())
+				parent_idx = self.file_model.index(parent_dir)
+				if parent_idx.isValid():
+					self.tree_view.expand(parent_idx)
+			except Exception as e:
+				QMessageBox.information(self, "Error", f"Failed to delete: {e}")
+	
 	def toggle_find_replace(self):
 		if self.find_dock.isVisible():
 			self.find_dock.hide()
@@ -685,7 +1158,7 @@ class MainWindow(QMainWindow):
 
 	def current_editor(self) -> CustomTextEdit:
 		tab = self.current_tab()
-		return tab.editor if tab else None
+		return tab.editor if isinstance(tab, TextEditorTab) else None
 
 	def current_linter(self) -> EnglishLinter:
 		tab = self.current_tab()
@@ -752,9 +1225,6 @@ class MainWindow(QMainWindow):
 			"change_font": "None",
 			"change_font_size": "None",
 			"change_line_spacing": "None",
-			"outline_none": "None",
-			"outline_a4": "None",
-			"outline_iso216": "None",
 			"toggle_suggestions": "Ctrl+E",
 			"save_raw_file": "Ctrl+Alt+S"
 		}
@@ -765,7 +1235,7 @@ class MainWindow(QMainWindow):
 					binds = json.load(f)
 					default_binds.update(binds)
 			except Exception as e:
-				QMessageBox.information(self, "Keybindings Failed to load", e)
+				QMessageBox.information(self, "Keybindings Failed to load", str(e))
 		self.keybinds = default_binds
 
 	def apply_keybinds(self):
@@ -786,9 +1256,6 @@ class MainWindow(QMainWindow):
 			("change_font", self.findChild(QAction, "font_action")),
 			("change_font_size", self.findChild(QAction, "font_size_action")),
 			("change_line_spacing", self.findChild(QAction, "line_spacing_action")),
-			("outline_none", self.findChild(QAction, "none_action")),
-			("outline_a4", self.findChild(QAction, "a4_action")),
-			("outline_iso216", self.findChild(QAction, "iso216_action")),
 			("toggle_suggestions", self.findChild(QAction, "toggle_suggestions_action")),
 			("save_raw_file", self.findChild(QAction, "save_raw_action"))
 		]
@@ -819,7 +1286,7 @@ class MainWindow(QMainWindow):
 				QMessageBox.information(self, "Keybindings Updated", "Keybindings were updated and applied.")
 		except Exception as e:
 			print(e)
-			QMessageBox.information(self, "Error:", e)
+			QMessageBox.information(self, "Error:", str(e))
 
 	def toggle_suggestions(self):
 		current = getattr(self, "suggestions_enabled", True)
@@ -834,14 +1301,18 @@ class MainWindow(QMainWindow):
 		if dock.case_checkbox.isChecked():
 			flags |= QTextDocument.FindCaseSensitively
 
-		cursor = self.current_editor().textCursor()
-		found = self.current_editor().document().find(text, cursor, flags)
+		editor = self.current_editor()
+		if not editor:
+			return
+
+		cursor = editor.textCursor()
+		found = editor.document().find(text, cursor, flags)
 		if found.isNull():
-			found = self.current_editor().document().find(text, QTextCursor(), flags)
+			found = editor.document().find(text, QTextCursor(), flags)
 
 		if not found.isNull():
-			self.current_editor().setTextCursor(found)
-			self.current_editor().setFocus()
+			editor.setTextCursor(found)
+			editor.setFocus()
 
 	def new_document(self):
 		tab = TextEditorTab(
@@ -862,13 +1333,6 @@ class MainWindow(QMainWindow):
 			cursor.insertText(dock.replace_input.text())
 		self.find_text_docked(dock)
 
-	def current_tab(self):
-		return self.tabs.currentWidget()
-
-	def current_editor(self):
-		tab = self.current_tab()
-		return tab.editor if isinstance(tab, TextEditorTab) else None
-
 	def load_instaplace_rules(self, path=get_user_config_path("instaplace.json")):
 		try:
 			self.instaplace_rules.clear()
@@ -877,13 +1341,16 @@ class MainWindow(QMainWindow):
 					self.instaplace_rules = json.load(file)
 		except Exception as e:
 			print(e)
-			QMessageBox.information(self, "Error:", e)
+			QMessageBox.information(self, "Error:", str(e))
 
 	def apply_instaplace_live(self):
 		if not self.instaplace_enabled:
 			return
 
-		cursor = self.current_editor().textCursor()
+		editor = self.current_editor()
+		if not editor:
+			return
+		cursor = editor.textCursor()
 		cursor.select(QTextCursor.WordUnderCursor)
 		word = cursor.selectedText()
 
@@ -916,14 +1383,10 @@ class MainWindow(QMainWindow):
 																								  flags=re.IGNORECASE)
 		self.current_editor().setPlainText(new_content)
 
-	def set_outline(self, mode):
-		self.outline_mode = mode
-		self.current_editor().viewport().update()
-
 	def eventFilter(self, obj, event):
-		if obj == self.current_editor().viewport() and event.type() == event.Paint:
+		if obj == getattr(self.current_editor(), 'viewport', lambda: None)() and event.type() == QEvent.Paint:
 			result = super().eventFilter(obj, event)
-			self.draw_outline()
+			self.draw_bracket_guides()
 			return result
 		return super().eventFilter(obj, event)
 
@@ -952,29 +1415,33 @@ class MainWindow(QMainWindow):
 			self.current_tab().sentence_per_paragraph = value
 			self.update_counters()
 
-	def draw_outline(self):
+	def draw_bracket_guides(self):
 		editor = self.current_editor()
 		if not editor:
 			return
-		painter = QPainter(editor.viewport())
-		pen = QPen(Qt.magenta, 2, Qt.DashLine)
-		painter.setPen(pen)
-
-		dpi = self.logicalDpiX()
-
-		if self.outline_mode == "A4":
-			width_in, height_in = 8.27, 11.69
-		elif self.outline_mode == "ISO216":
-			width_in, height_in = 9.84, 13.9
-		else:
+		mi = getattr(editor, 'match_info', None)
+		if not mi or not mi.get('matched'):
 			return
+		if mi.get('open_pos') is None or mi.get('close_pos') is None:
+			return
+		try:
+			open_cursor = QTextCursor(editor.document())
+			open_cursor.setPosition(mi['open_pos'])
+			open_rect = editor.cursorRect(open_cursor)
+			close_cursor = QTextCursor(editor.document())
+			close_cursor.setPosition(mi['close_pos'])
+			close_rect = editor.cursorRect(close_cursor)
 
-		width_px = int(width_in * dpi)
-		height_px = int(height_in * dpi)
-
-		rect = QRect(0, 0, min(width_px, self.current_editor().viewport().width()),
-					 min(height_px, self.current_editor().viewport().height()))
-		painter.drawRect(rect)
+			if abs(open_rect.x() - close_rect.x()) <= 3:
+				painter = QPainter(editor.viewport())
+				pen = QPen(QColor(160, 160, 160, 180), 1, Qt.SolidLine)
+				painter.setPen(pen)
+				x = open_rect.x() + open_rect.width() // 2
+				y1 = open_rect.y() + open_rect.height() // 2
+				y2 = close_rect.y() + close_rect.height() // 2
+				painter.drawLine(x, y1, x, y2)
+		except Exception:
+			pass
 
 	def change_font(self):
 		current_font = self.current_editor().font()
@@ -1029,52 +1496,10 @@ class MainWindow(QMainWindow):
 				tab.path = path
 				tab_name = os.path.basename(path)
 
-				index = self.tabs.addTab(tab, tab_name)
-				self.tabs.setCurrentIndex(index)
-
-				tab.path = path
-				tab_name = os.path.basename(path)
-
-				settings_match = re.search(
-					r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>",
-					full_text, re.DOTALL
-				)
-
-				if settings_match:
-					settings_str = settings_match.group(1)
-					content_start = settings_match.end()
-					content = full_text[content_start:].lstrip()
-					tab.editor.setPlainText(content)
-				else:
-					tab.editor.setPlainText(full_text)
+				tab.editor.setPlainText(full_text)
 
 				index = self.tabs.addTab(tab, tab_name)
 				self.tabs.setCurrentIndex(index)
-
-				if settings_match:
-					try:
-						settings = json.loads(settings_str)
-						font_family = settings.get("font_family", "Consolas")
-						font_size = settings.get("font_size", 14)
-						font = QFont(font_family, font_size)
-						tab.editor.setFont(font)
-						tab.editor.document().setDefaultFont(font)
-						tab.sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
-
-						spacing = settings.get("line_spacing", 1.0)
-						cursor = tab.editor.textCursor()
-						cursor.beginEditBlock()
-						block = tab.editor.document().firstBlock()
-						while block.isValid():
-							cursor.setPosition(block.position())
-							cursor.select(QTextCursor.BlockUnderCursor)
-							fmt = cursor.blockFormat()
-							fmt.setLineHeight(spacing * 100, QTextBlockFormat.ProportionalHeight)
-							cursor.setBlockFormat(fmt)
-							block = block.next()
-						cursor.endEditBlock()
-					except Exception as e:
-						print("Failed to apply settings:", e)
 
 				self.update_counters()
 				self._update_discord_rpc()
@@ -1111,50 +1536,15 @@ class MainWindow(QMainWindow):
 					suggestions_enabled=self.suggestions_enabled,
 					instaplace_rules=self.instaplace_rules if self.instaplace_enabled else []
 				)
+				self._wire_up_editor(tab.editor)
 
 				tab.path = path
 				tab_name = os.path.basename(path)
 
-				settings_match = re.search(
-					r"<__s-e-t-t-i-n-g-s__>\s*(\{.*?\})\s*</__s-e-t-t-i-n-g-s__>",
-					full_text, re.DOTALL
-				)
-
-				if settings_match:
-					settings_str = settings_match.group(1)
-					content_start = settings_match.end()
-					content = full_text[content_start:].lstrip()
-					tab.editor.setPlainText(content)
-				else:
-					tab.editor.setPlainText(full_text)
+				tab.editor.setPlainText(full_text)
 
 				index = self.tabs.addTab(tab, tab_name)
 				self.tabs.setCurrentIndex(index)
-
-				if settings_match:
-					try:
-						settings = json.loads(settings_str)
-						font_family = settings.get("font_family", "Consolas")
-						font_size = settings.get("font_size", 14)
-						font = QFont(font_family, font_size)
-						tab.editor.setFont(font)
-						tab.editor.document().setDefaultFont(font)
-						tab.sentence_per_paragraph = settings.get("sentence_per_paragraph", 3)
-
-						spacing = settings.get("line_spacing", 1.0)
-						cursor = tab.editor.textCursor()
-						cursor.beginEditBlock()
-						block = tab.editor.document().firstBlock()
-						while block.isValid():
-							cursor.setPosition(block.position())
-							cursor.select(QTextCursor.BlockUnderCursor)
-							fmt = cursor.blockFormat()
-							fmt.setLineHeight(spacing * 100, QTextBlockFormat.ProportionalHeight)
-							cursor.setBlockFormat(fmt)
-							block = block.next()
-						cursor.endEditBlock()
-					except Exception as e:
-						print("Failed to apply settings:", e)
 
 				self.update_counters()
 				self._update_discord_rpc()
@@ -1200,7 +1590,7 @@ class MainWindow(QMainWindow):
 
 		except Exception as e:
 			print(e)
-			QMessageBox.information(self, "Error", str(e))
+			QMessageBox.information(self, "Error:", str(e))
 
 	def _save_to_path(self, path):
 		try:
@@ -1212,7 +1602,7 @@ class MainWindow(QMainWindow):
 			}
 
 			content = self.current_editor().toPlainText()
-			data = f"<__s-e-t-t-i-n-g-s__>\n{json.dumps(settings, indent=2)}\n</__s-e-t-t-i-n-g-s__>\n{content}"
+			data = f"\n{content}"
 
 			with open(path, "w", encoding="utf-8") as file:
 				file.write(data)
@@ -1261,7 +1651,7 @@ class MainWindow(QMainWindow):
 
 	@staticmethod
 	def strip_settings_tag(text):
-		return re.sub(r"<__s-e-t-t-i-n-g-s__>.*?</__s-e-t-t-i-n-g-s__>", "", text, flags=re.DOTALL)
+		return re.sub(r"", "", text, flags=re.DOTALL)
 
 	def _get_line_spacing(self):
 		cursor = self.current_editor().textCursor()
@@ -1274,6 +1664,20 @@ class MainWindow(QMainWindow):
 		self.current_linter().load_rules()
 		self.supported_filetypes = load_supported_filetypes()
 
+	def navigate_history(self, direction: int):
+		"""
+		direction: -1 for up (previous), +1 for down (next)
+		"""
+		if not self.terminal_history:
+			return
+		new_index = self._history_index + direction
+		new_index = max(0, min(new_index, len(self.terminal_history)))
+		if new_index == len(self.terminal_history):
+			self.terminal_input.setText("")
+		else:
+			self.terminal_input.setText(self.terminal_history[new_index])
+		self._history_index = new_index
+
 if __name__ == "__main__":
 	setup_user_config()
 	app = QApplication(sys.argv)
@@ -1281,10 +1685,18 @@ if __name__ == "__main__":
 	theme_path = get_user_config_path("theme.qss")
 	if os.path.exists(theme_path):
 		try:
-			with open(theme_path, "r", encoding="utf-8") as file:
-				app.setStyleSheet(file.read())
+			with open(theme_path, "rb") as f:
+				raw = f.read()
+			try:
+				qss_text = raw.decode("utf-8")
+			except UnicodeDecodeError:
+				qss_text = raw.decode("utf-8-sig", errors="replace")
+			qss_text = "".join(ch for ch in qss_text if ch == "\n" or ch == "\t" or (ord(ch) >= 32))
+			app.setStyleSheet(qss_text)
 		except Exception as e:
-			print("Could not apply stylesheet:", e)
+			print("Could not parse application stylesheet (caught):", e)
+	else:
+		pass
 
 	window = MainWindow()
 	window.resize(1540, 900)
