@@ -1,3 +1,4 @@
+
 [
 	{
 		"word": "the",
@@ -1281,6 +1282,10 @@
 	},
 	{
 		"word": "public",
+		"color": "darkslategray"
+	},
+	{
+		"word": "pub",
 		"color": "darkslategray"
 	},
 	{
